@@ -7,7 +7,7 @@ import type {
   ServiceAdminUserListInput,
 } from "@/server/validators/user.validator";
 import { UserRole } from "../db/generated/prisma/client";
-import { DeviceLatestRecord } from "../services/user.service";
+import { DeviceLatestRecord, ModuleLatestRecord } from "../services/user.service";
 
 export interface UserDeleteRecord {
   id: bigint;
@@ -296,6 +296,43 @@ export class UserRepository {
     };
   }
 
+async findLatestDeviceByModule(
+  sno: string,
+): Promise<ModuleLatestRecord | null> {
+  const [currentStatus, latestLog] = await Promise.all([
+    this.dbClient.deviceCurrentStatus.findUnique({
+      where: {
+        sno,
+      },
+      select: {
+        status: true,
+      },
+    }),
+
+    this.dbClient.deviceLogs.findFirst({
+      where: {
+        sno,
+      },
+      orderBy: {
+        timestamp: "desc",
+      },
+      select: {
+        sno: true,
+        mac_address: true,
+        device_model: true,
+        firmware_version: true,
+      },
+    }),
+  ]);
+
+  return {
+    sno: latestLog?.sno ?? sno,
+    status: currentStatus?.status ?? "Offline",
+    mac_address: latestLog?.mac_address ?? null,
+    device_model: latestLog?.device_model ?? null,
+    firmware_version: latestLog?.firmware_version ?? null,
+  };
+}
   async updateProfile(
     userId: bigint,
     payload: {
