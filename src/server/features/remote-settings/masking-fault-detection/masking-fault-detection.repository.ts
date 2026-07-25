@@ -14,8 +14,11 @@ export async function createMaskingFaultDetectionReadTask(
 	plantId: string,
 	deviceId: string,
 	createdById: bigint,
-): Promise<{ taskId: bigint }> {
-	await getScopedInverterOrThrow(
+): Promise<{
+    taskId: bigint;
+    macAddress: string;
+}> {
+	const inverter = await getScopedInverterOrThrow(
 		prisma,
 		scope,
 		plantId,
@@ -24,7 +27,7 @@ export async function createMaskingFaultDetectionReadTask(
 
 	const task = await prisma.deviceRemoteSettingTask.create({
 		data: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			kind: "settings",
 			tab: TAB,
 			payload: {},
@@ -38,6 +41,7 @@ export async function createMaskingFaultDetectionReadTask(
 
 	return {
 		taskId: task.id,
+		macAddress: inverter.macAddress,
 	};
 }
 export async function getMaskingFaultDetectionSettings(
@@ -47,11 +51,11 @@ export async function getMaskingFaultDetectionSettings(
 ): Promise<{
 	rawSettings: Prisma.JsonValue | null;
 }> {
-	await getScopedInverterOrThrow(prisma, scope, plantId, deviceId);
+	const inverter = await getScopedInverterOrThrow(prisma, scope, plantId, deviceId);
 
 	const row = await prisma.deviceRemoteSetting.findFirst({
 		where: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			tab: TAB,
 		},
 		orderBy: {
@@ -78,12 +82,15 @@ export async function submitMaskingFaultDetectionSettings(
 	deviceId: string,
 	settings: MaskingFaultDetectionSettings,
 	updatedById: bigint,
-): Promise<{ taskId: bigint }> {
+): Promise<{
+    taskId: bigint;
+    macAddress: string;
+}> {
 	const inverter = await getScopedInverterOrThrow(prisma, scope, plantId, deviceId);
 
 	const task = await prisma.deviceRemoteSettingTask.create({
 		data: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			kind: "settings",
 			tab: TAB,
 			payload: toInputJson(settings),
@@ -97,5 +104,6 @@ export async function submitMaskingFaultDetectionSettings(
 
 	return {
 		taskId: task.id,
+		macAddress: inverter.macAddress,
 	};
 }

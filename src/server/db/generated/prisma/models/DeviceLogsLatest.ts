@@ -48,6 +48,7 @@ export type DeviceLogsLatestMinAggregateOutputType = {
   id: bigint | null
   sno: string | null
   inverterName: string | null
+  macAddress: string | null
   dayDate: Date | null
   latestTimestamp: Date | null
   sourceLogId: bigint | null
@@ -64,6 +65,7 @@ export type DeviceLogsLatestMaxAggregateOutputType = {
   id: bigint | null
   sno: string | null
   inverterName: string | null
+  macAddress: string | null
   dayDate: Date | null
   latestTimestamp: Date | null
   sourceLogId: bigint | null
@@ -80,6 +82,7 @@ export type DeviceLogsLatestCountAggregateOutputType = {
   id: number
   sno: number
   inverterName: number
+  macAddress: number
   dayDate: number
   latestTimestamp: number
   sourceLogId: number
@@ -116,6 +119,7 @@ export type DeviceLogsLatestMinAggregateInputType = {
   id?: true
   sno?: true
   inverterName?: true
+  macAddress?: true
   dayDate?: true
   latestTimestamp?: true
   sourceLogId?: true
@@ -132,6 +136,7 @@ export type DeviceLogsLatestMaxAggregateInputType = {
   id?: true
   sno?: true
   inverterName?: true
+  macAddress?: true
   dayDate?: true
   latestTimestamp?: true
   sourceLogId?: true
@@ -148,6 +153,7 @@ export type DeviceLogsLatestCountAggregateInputType = {
   id?: true
   sno?: true
   inverterName?: true
+  macAddress?: true
   dayDate?: true
   latestTimestamp?: true
   sourceLogId?: true
@@ -251,6 +257,7 @@ export type DeviceLogsLatestGroupByOutputType = {
   id: bigint
   sno: string
   inverterName: string | null
+  macAddress: string | null
   dayDate: Date
   latestTimestamp: Date
   sourceLogId: bigint
@@ -290,6 +297,7 @@ export type DeviceLogsLatestWhereInput = {
   id?: Prisma.BigIntFilter<"DeviceLogsLatest"> | bigint | number
   sno?: Prisma.StringFilter<"DeviceLogsLatest"> | string
   inverterName?: Prisma.StringNullableFilter<"DeviceLogsLatest"> | string | null
+  macAddress?: Prisma.StringNullableFilter<"DeviceLogsLatest"> | string | null
   dayDate?: Prisma.DateTimeFilter<"DeviceLogsLatest"> | Date | string
   latestTimestamp?: Prisma.DateTimeFilter<"DeviceLogsLatest"> | Date | string
   sourceLogId?: Prisma.BigIntFilter<"DeviceLogsLatest"> | bigint | number
@@ -307,6 +315,7 @@ export type DeviceLogsLatestOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   sno?: Prisma.SortOrder
   inverterName?: Prisma.SortOrderInput | Prisma.SortOrder
+  macAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   dayDate?: Prisma.SortOrder
   latestTimestamp?: Prisma.SortOrder
   sourceLogId?: Prisma.SortOrder
@@ -330,6 +339,7 @@ export type DeviceLogsLatestWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.DeviceLogsLatestWhereInput | Prisma.DeviceLogsLatestWhereInput[]
   sno?: Prisma.StringFilter<"DeviceLogsLatest"> | string
   inverterName?: Prisma.StringNullableFilter<"DeviceLogsLatest"> | string | null
+  macAddress?: Prisma.StringNullableFilter<"DeviceLogsLatest"> | string | null
   dayDate?: Prisma.DateTimeFilter<"DeviceLogsLatest"> | Date | string
   latestTimestamp?: Prisma.DateTimeFilter<"DeviceLogsLatest"> | Date | string
   dailyProduction?: Prisma.DecimalNullableFilter<"DeviceLogsLatest"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -345,6 +355,7 @@ export type DeviceLogsLatestOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   sno?: Prisma.SortOrder
   inverterName?: Prisma.SortOrderInput | Prisma.SortOrder
+  macAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   dayDate?: Prisma.SortOrder
   latestTimestamp?: Prisma.SortOrder
   sourceLogId?: Prisma.SortOrder
@@ -369,6 +380,7 @@ export type DeviceLogsLatestScalarWhereWithAggregatesInput = {
   id?: Prisma.BigIntWithAggregatesFilter<"DeviceLogsLatest"> | bigint | number
   sno?: Prisma.StringWithAggregatesFilter<"DeviceLogsLatest"> | string
   inverterName?: Prisma.StringNullableWithAggregatesFilter<"DeviceLogsLatest"> | string | null
+  macAddress?: Prisma.StringNullableWithAggregatesFilter<"DeviceLogsLatest"> | string | null
   dayDate?: Prisma.DateTimeWithAggregatesFilter<"DeviceLogsLatest"> | Date | string
   latestTimestamp?: Prisma.DateTimeWithAggregatesFilter<"DeviceLogsLatest"> | Date | string
   sourceLogId?: Prisma.BigIntWithAggregatesFilter<"DeviceLogsLatest"> | bigint | number
@@ -385,6 +397,7 @@ export type DeviceLogsLatestCreateInput = {
   id?: bigint | number
   sno: string
   inverterName?: string | null
+  macAddress?: string | null
   dayDate: Date | string
   latestTimestamp: Date | string
   batchKey: string
@@ -401,6 +414,7 @@ export type DeviceLogsLatestUncheckedCreateInput = {
   id?: bigint | number
   sno: string
   inverterName?: string | null
+  macAddress?: string | null
   dayDate: Date | string
   latestTimestamp: Date | string
   sourceLogId: bigint | number
@@ -417,6 +431,7 @@ export type DeviceLogsLatestUpdateInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   sno?: Prisma.StringFieldUpdateOperationsInput | string
   inverterName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   latestTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   batchKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -433,6 +448,7 @@ export type DeviceLogsLatestUncheckedUpdateInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   sno?: Prisma.StringFieldUpdateOperationsInput | string
   inverterName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   latestTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sourceLogId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -449,6 +465,7 @@ export type DeviceLogsLatestCreateManyInput = {
   id?: bigint | number
   sno: string
   inverterName?: string | null
+  macAddress?: string | null
   dayDate: Date | string
   latestTimestamp: Date | string
   sourceLogId: bigint | number
@@ -465,6 +482,7 @@ export type DeviceLogsLatestUpdateManyMutationInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   sno?: Prisma.StringFieldUpdateOperationsInput | string
   inverterName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   latestTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   batchKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -480,6 +498,7 @@ export type DeviceLogsLatestUncheckedUpdateManyInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   sno?: Prisma.StringFieldUpdateOperationsInput | string
   inverterName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   latestTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sourceLogId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -506,6 +525,7 @@ export type DeviceLogsLatestCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   sno?: Prisma.SortOrder
   inverterName?: Prisma.SortOrder
+  macAddress?: Prisma.SortOrder
   dayDate?: Prisma.SortOrder
   latestTimestamp?: Prisma.SortOrder
   sourceLogId?: Prisma.SortOrder
@@ -531,6 +551,7 @@ export type DeviceLogsLatestMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   sno?: Prisma.SortOrder
   inverterName?: Prisma.SortOrder
+  macAddress?: Prisma.SortOrder
   dayDate?: Prisma.SortOrder
   latestTimestamp?: Prisma.SortOrder
   sourceLogId?: Prisma.SortOrder
@@ -547,6 +568,7 @@ export type DeviceLogsLatestMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   sno?: Prisma.SortOrder
   inverterName?: Prisma.SortOrder
+  macAddress?: Prisma.SortOrder
   dayDate?: Prisma.SortOrder
   latestTimestamp?: Prisma.SortOrder
   sourceLogId?: Prisma.SortOrder
@@ -604,6 +626,7 @@ export type DeviceLogsLatestCreateWithoutSourceLogInput = {
   id?: bigint | number
   sno: string
   inverterName?: string | null
+  macAddress?: string | null
   dayDate: Date | string
   latestTimestamp: Date | string
   batchKey: string
@@ -619,6 +642,7 @@ export type DeviceLogsLatestUncheckedCreateWithoutSourceLogInput = {
   id?: bigint | number
   sno: string
   inverterName?: string | null
+  macAddress?: string | null
   dayDate: Date | string
   latestTimestamp: Date | string
   batchKey: string
@@ -650,6 +674,7 @@ export type DeviceLogsLatestUpdateWithoutSourceLogInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   sno?: Prisma.StringFieldUpdateOperationsInput | string
   inverterName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   latestTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   batchKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -665,6 +690,7 @@ export type DeviceLogsLatestUncheckedUpdateWithoutSourceLogInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   sno?: Prisma.StringFieldUpdateOperationsInput | string
   inverterName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   latestTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   batchKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -682,6 +708,7 @@ export type DeviceLogsLatestSelect<ExtArgs extends runtime.Types.Extensions.Inte
   id?: boolean
   sno?: boolean
   inverterName?: boolean
+  macAddress?: boolean
   dayDate?: boolean
   latestTimestamp?: boolean
   sourceLogId?: boolean
@@ -699,6 +726,7 @@ export type DeviceLogsLatestSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   id?: boolean
   sno?: boolean
   inverterName?: boolean
+  macAddress?: boolean
   dayDate?: boolean
   latestTimestamp?: boolean
   sourceLogId?: boolean
@@ -716,6 +744,7 @@ export type DeviceLogsLatestSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   id?: boolean
   sno?: boolean
   inverterName?: boolean
+  macAddress?: boolean
   dayDate?: boolean
   latestTimestamp?: boolean
   sourceLogId?: boolean
@@ -733,6 +762,7 @@ export type DeviceLogsLatestSelectScalar = {
   id?: boolean
   sno?: boolean
   inverterName?: boolean
+  macAddress?: boolean
   dayDate?: boolean
   latestTimestamp?: boolean
   sourceLogId?: boolean
@@ -745,7 +775,7 @@ export type DeviceLogsLatestSelectScalar = {
   updatedAt?: boolean
 }
 
-export type DeviceLogsLatestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sno" | "inverterName" | "dayDate" | "latestTimestamp" | "sourceLogId" | "batchKey" | "dailyProduction" | "totalEnergy" | "totalHours" | "currentPower" | "createdAt" | "updatedAt", ExtArgs["result"]["deviceLogsLatest"]>
+export type DeviceLogsLatestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sno" | "inverterName" | "macAddress" | "dayDate" | "latestTimestamp" | "sourceLogId" | "batchKey" | "dailyProduction" | "totalEnergy" | "totalHours" | "currentPower" | "createdAt" | "updatedAt", ExtArgs["result"]["deviceLogsLatest"]>
 export type DeviceLogsLatestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sourceLog?: boolean | Prisma.DeviceLogsDefaultArgs<ExtArgs>
 }
@@ -765,6 +795,7 @@ export type $DeviceLogsLatestPayload<ExtArgs extends runtime.Types.Extensions.In
     id: bigint
     sno: string
     inverterName: string | null
+    macAddress: string | null
     dayDate: Date
     latestTimestamp: Date
     sourceLogId: bigint
@@ -1202,6 +1233,7 @@ export interface DeviceLogsLatestFieldRefs {
   readonly id: Prisma.FieldRef<"DeviceLogsLatest", 'BigInt'>
   readonly sno: Prisma.FieldRef<"DeviceLogsLatest", 'String'>
   readonly inverterName: Prisma.FieldRef<"DeviceLogsLatest", 'String'>
+  readonly macAddress: Prisma.FieldRef<"DeviceLogsLatest", 'String'>
   readonly dayDate: Prisma.FieldRef<"DeviceLogsLatest", 'DateTime'>
   readonly latestTimestamp: Prisma.FieldRef<"DeviceLogsLatest", 'DateTime'>
   readonly sourceLogId: Prisma.FieldRef<"DeviceLogsLatest", 'BigInt'>

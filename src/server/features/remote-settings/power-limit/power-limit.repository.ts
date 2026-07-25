@@ -15,8 +15,11 @@ export async function createPowerLimitReadTask(
 	plantId: string,
 	deviceId: string,
 	createdById: bigint,
-): Promise<{ taskId: bigint }> {
-	await getScopedInverterOrThrow(
+): Promise<{
+    taskId: bigint;
+    macAddress: string;
+}> {
+	const inverter = await getScopedInverterOrThrow(
 		prisma,
 		scope,
 		plantId,
@@ -25,7 +28,7 @@ export async function createPowerLimitReadTask(
 
 	const task = await prisma.deviceRemoteSettingTask.create({
 		data: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			kind: "settings",
 			tab: TAB,
 			payload: {},
@@ -39,6 +42,7 @@ export async function createPowerLimitReadTask(
 
 	return {
 		taskId: task.id,
+		macAddress: inverter.macAddress,
 	};
 }
 
@@ -50,11 +54,11 @@ export async function getPowerLimitSettings(
 	rawSettings: Prisma.JsonValue | null;
 }> {
 	// ): Promise<PowerLimitSettings> {
-	await getScopedInverterOrThrow(prisma, scope, plantId, deviceId);
+	const inverter = await getScopedInverterOrThrow(prisma, scope, plantId, deviceId);
 
 	const row = await prisma.deviceRemoteSetting.findFirst({
 		where: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			tab: TAB,
 		},
 		orderBy: {
@@ -81,7 +85,10 @@ export async function submitPowerLimitSettings(
 	deviceId: string,
 	settings: PowerLimitSettings,
 	updatedById: bigint,
-): Promise<{ taskId: bigint }> {
+): Promise<{
+    taskId: bigint;
+    macAddress: string;
+}> {
 	const inverter = await getScopedInverterOrThrow(
 		prisma,
 		scope,
@@ -91,7 +98,7 @@ export async function submitPowerLimitSettings(
 
 	const task = await prisma.deviceRemoteSettingTask.create({
 		data: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			kind: "settings",
 			tab: TAB,
 			payload: toInputJson(settings),
@@ -105,5 +112,6 @@ export async function submitPowerLimitSettings(
 
 	return {
 		taskId: task.id,
+		macAddress: inverter.macAddress,
 	};
 }

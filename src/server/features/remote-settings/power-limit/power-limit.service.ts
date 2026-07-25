@@ -79,7 +79,7 @@ export async function getPowerLimit(params: PowerLimitReadParams): Promise<Power
 		params.deviceId,
 		toBigIntUserId(params.user.userId),
 	);
-	const mqtt_published = await publishRemoteSettingPattern(read_pattern);
+	const mqtt_published = await publishRemoteSettingPattern(task.macAddress,read_pattern);
 
 	if (!mqtt_published) {
 		throw new ApiError(
@@ -133,7 +133,7 @@ export async function submitPowerLimit(params: PowerLimitWriteParams): Promise<S
 	const registers = pickRegisters(registerMap, Object.keys(params.settings));
 	const read_pattern = await getReadPattern(TAB);
 	const { pattern: write_pattern, unmappedFields: unmapped_fields } = await getWritePattern(TAB, params.settings);
-	const mqtt_published = await publishRemoteSettingPattern(write_pattern);
+	const mqtt_published = await publishRemoteSettingPattern(task.macAddress, write_pattern);
 	if (!mqtt_published) {
 		throw new ApiError(500, "Failed to publish MQTT command.");
 	}

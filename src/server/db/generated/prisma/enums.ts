@@ -9,6 +9,53 @@
 * 🟢 You can import this file directly.
 */
 
+export const ChipType = {
+  MASTER_DSP: 'MASTER_DSP',
+  SLAVE_DSP: 'SLAVE_DSP',
+  CSB: 'CSB',
+  DCDC_DSP: 'DCDC_DSP',
+  AFCI: 'AFCI',
+  BMS1: 'BMS1',
+  BMS2: 'BMS2',
+  LCD: 'LCD'
+} as const
+
+export type ChipType = (typeof ChipType)[keyof typeof ChipType]
+
+
+export const UpdateType = {
+  NORMAL: 'NORMAL',
+  FORCE: 'FORCE'
+} as const
+
+export type UpdateType = (typeof UpdateType)[keyof typeof UpdateType]
+
+
+export const FotaJobStatus = {
+  PENDING: 'PENDING',
+  SENDING_INFORMATION: 'SENDING_INFORMATION',
+  LINK_SAVED: 'LINK_SAVED',
+  DOWNLOADING: 'DOWNLOADING',
+  DOWNLOAD_COMPLETED: 'DOWNLOAD_COMPLETED',
+  FLASHING: 'FLASHING',
+  RESTARTING: 'RESTARTING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+} as const
+
+export type FotaJobStatus = (typeof FotaJobStatus)[keyof typeof FotaJobStatus]
+
+
+export const CommandLogStatus = {
+  PENDING: 'PENDING',
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED',
+  TIMEOUT: 'TIMEOUT'
+} as const
+
+export type CommandLogStatus = (typeof CommandLogStatus)[keyof typeof CommandLogStatus]
+
+
 export const RemoteSettingsTab = {
   gridParameters: 'gridParameters',
   featureParameters: 'featureParameters',

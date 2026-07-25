@@ -132,3 +132,33 @@ export type DeviceRemoteSetting = Prisma.DeviceRemoteSettingModel
  * 
  */
 export type DeviceRemoteSettingTask = Prisma.DeviceRemoteSettingTaskModel
+/**
+ * Model Firmware
+ * 
+ */
+export type Firmware = Prisma.FirmwareModel
+/**
+ * Model UpgradeTask
+ * 
+ */
+export type UpgradeTask = Prisma.UpgradeTaskModel
+/**
+ * Model TaskJob
+ * 
+ */
+export type TaskJob = Prisma.TaskJobModel
+/**
+ * Model FotaJob
+ * 
+ */
+export type FotaJob = Prisma.FotaJobModel
+/**
+ * Model FotaConfig
+ * 
+ */
+export type FotaConfig = Prisma.FotaConfigModel
+/**
+ * Model FotaCommandLog
+ * 
+ */
+export type FotaCommandLog = Prisma.FotaCommandLogModel

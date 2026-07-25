@@ -266,6 +266,7 @@ model DeviceLogsLatest {
   id              BigInt     @id @default(autoincrement())
   sno             String     @db.VarChar(255)
   inverterName    String?    @map("inverter_name")
+  macAddress      String?    @map("mac_address") @db.VarChar(255)
   dayDate         DateTime   @map("day_date") @db.Date
   latestTimestamp DateTime   @map("latest_timestamp")
   sourceLogId     BigInt     @unique @map("source_log_id")

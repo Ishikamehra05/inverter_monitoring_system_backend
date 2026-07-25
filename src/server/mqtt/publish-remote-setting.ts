@@ -5,8 +5,8 @@ import { mqttClient } from './client';
 // schema (DeviceInverter/DeviceConnectionStatus don't have it yet).
 const TEST_IMEI = '866192071849342';
 
-function buildTopic(imei: string): string {
-	return `polycabsolarwrite/new/gsm/ongrid/log/ec600u/${imei}`;
+function buildTopic(macAddress: string,): string {
+	return `polycabsolarwrite/new/gsm/ongrid/log/ec600u/${macAddress}`;
 }
 
 const PUBLISH_ACK_TIMEOUT_MS = 5000;
@@ -17,8 +17,13 @@ const PUBLISH_ACK_TIMEOUT_MS = 5000;
 // $RL:/$WL: prefix in the payload is what tells the device which operation
 // it is. The boolean only reflects the broker accepting the publish (QoS 1
 // PUBACK), not that the physical device received or acted on it.
-export function publishRemoteSettingPattern(pattern: string): Promise<boolean> {
-	const topic = buildTopic(TEST_IMEI);
+export function publishRemoteSettingPattern(macAddress: string, pattern: string): Promise<boolean> {
+	const topic = buildTopic(macAddress);
+	console.log("========== MQTT PUBLISH ==========");
+	console.log("MAC Address :", macAddress);
+	console.log("Topic       :", topic);
+	console.log("Pattern     :", pattern);
+	console.log("==================================");
 
 	return new Promise((resolve) => {
 		let settled = false;
@@ -40,6 +45,10 @@ export function publishRemoteSettingPattern(pattern: string): Promise<boolean> {
 				resolve(false);
 				return;
 			}
+			console.log("✅ MQTT Publish Success");
+			console.log("Topic :", topic);
+			console.log("Payload :", pattern);
+
 
 			resolve(true);
 		});
