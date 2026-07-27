@@ -690,18 +690,33 @@ export class DeviceRepository {
 
       console.log("before connectionStatus");
 
-      const connectionStatus =
-        await this.dbClient.deviceConnectionStatus.findFirst({
-          where: {
-            serialNumber: inverter.serialNumber,
-          },
-          select: {
-            status: true,
-            // lastseentime: true,
-          },
-        });
+      // const connectionStatus =
+      //   await this.dbClient.deviceConnectionStatus.findFirst({
+      //     where: {
+      //       serialNumber: inverter.serialNumber,
+      //     },
+      //     select: {
+      //       status: true,
+      //       // lastseentime: true,
+      //     },
+      //   });
 
-      console.log("connectionStatus", connectionStatus);
+      // console.log("connectionStatus", connectionStatus);
+
+      let connectionStatus = null;
+
+      if (latestLog?.macAddress) {
+        connectionStatus =
+          await this.dbClient.deviceConnectionStatus.findFirst({
+            where: {
+              macAddress: latestLog.macAddress,
+            },
+            select: {
+              status: true,
+              lastSeenTime: true,
+            },
+          });
+      }
       return {
         id: `device-${String(inverter.id)}`,
         name: inverter.name ?? `${inverter.type} ${inverter.serialNumber}`,
@@ -737,32 +752,37 @@ export class DeviceRepository {
       throw new ApiError(404, "Device not found");
     }
 
-    const [latestLog, connectionStatus] = await Promise.all([
-      this.dbClient.deviceLogsLatest.findFirst({
-        where: {
-          sno: datalogger.serialNumber,
-        },
-        orderBy: {
-          latestTimestamp: "desc",
-        },
-        select: {
-          currentPower: true,
-          dailyProduction: true,
-          totalEnergy: true,
-          totalHours: true,
-          latestTimestamp: true,
-        },
-      }),
-      this.dbClient.deviceConnectionStatus.findUnique({
-        where: {
-          serialNumber: datalogger.serialNumber,
-        },
-        select: {
-          status: true,
-          lastSeenTime: true,
-        },
-      }),
-    ]);
+    const latestLog = await this.dbClient.deviceLogsLatest.findFirst({
+      where: {
+        sno: datalogger.serialNumber,
+      },
+      orderBy: {
+        latestTimestamp: "desc",
+      },
+      select: {
+        currentPower: true,
+        dailyProduction: true,
+        totalEnergy: true,
+        totalHours: true,
+        latestTimestamp: true,
+        macAddress: true,
+      },
+    });
+
+    let connectionStatus = null;
+
+    if (latestLog?.macAddress) {
+      connectionStatus =
+        await this.dbClient.deviceConnectionStatus.findFirst({
+          where: {
+            macAddress: latestLog.macAddress,
+          },
+          select: {
+            status: true,
+            lastSeenTime: true,
+          },
+        });
+    }
 
     return {
       id: `device-${String(datalogger.id)}`,
