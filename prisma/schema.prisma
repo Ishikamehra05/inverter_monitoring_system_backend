@@ -30,6 +30,10 @@ model User {
   assignedBy        User?                  @relation("UserAssignment", fields: [assignedById], references: [id])
   assignedUsers     User[]                 @relation("UserAssignment")
 
+  firmwaresCreated Firmware[]
+  upgradeTasks     UpgradeTask[]
+  startedFotaJobs  FotaJob[]
+
   @@unique([portal, email])
   @@index([portal, role])
   @@index([status])
@@ -61,6 +65,8 @@ model Plant {
   currentStatus    PlantCurrentStatus?
   alertStates      DeviceAlertState[]
   alertEvents      AlertEvent[]
+
+  fotaJobs FotaJob[]
 
   @@index([type])
   @@index([name])
@@ -260,6 +266,7 @@ model DeviceLogsLatest {
   id              BigInt     @id @default(autoincrement())
   sno             String     @db.VarChar(255)
   inverterName    String?    @map("inverter_name")
+  macAddress      String?    @map("mac_address") @db.VarChar(255)
   dayDate         DateTime   @map("day_date") @db.Date
   latestTimestamp DateTime   @map("latest_timestamp")
   sourceLogId     BigInt     @unique @map("source_log_id")
@@ -417,8 +424,8 @@ model information_data {
 
 model DeviceConnectionStatus {
   id           BigInt    @id @default(autoincrement())
-  serialNumber String    @unique @map("serial_number") @db.VarChar(255)
-  macAddress   String?   @map("mac_address") @db.VarChar(255)
+  serialNumber String?   @map("serial_number") @db.VarChar(255)
+  macAddress   String    @unique @map("mac_address") @db.VarChar(255)
   status       String    @db.VarChar(50)
   lastSeenTime DateTime? @map("lastSeenTime") @db.Timestamptz(6)
 
@@ -597,6 +604,161 @@ model DeviceRemoteSettingTask {
   @@index([deviceInverterId], map: "device_remote_setting_tasks_device_inverter_id_idx")
   @@index([status], map: "device_remote_setting_tasks_status_idx")
   @@map("device_remote_setting_tasks")
+}
+
+model Firmware {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String    @db.VarChar(255)
+  chipType  ChipType? @map("chip_type")
+  version   String    @db.VarChar(255)
+  remark    String    @default("")
+  filePath  String    @map("file_path")
+  fileSize  BigInt?   @map("file_size")
+
+  createdById BigInt? @map("created_by")
+  createdBy   User?   @relation(fields: [createdById], references: [id])
+
+  createdTime DateTime  @default(now()) @map("created_time") @db.Timestamptz(6)
+  updatedTime DateTime  @updatedAt @map("updated_time") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  fotaJobs FotaJob[]
+
+  @@index([name], map: "idx_firmware_name")
+  @@index([version], map: "idx_firmware_version")
+  @@index([chipType], map: "idx_firmware_chip_type")
+  @@map("firmware")
+}
+
+model UpgradeTask {
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String @db.VarChar(255)
+
+  createdById BigInt? @map("created_by")
+  createdBy   User?   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  taskJobs TaskJob[]
+
+  @@map("upgrade_task")
+}
+
+model TaskJob {
+  taskId String @map("task_id") @db.Uuid
+  jobId  String @map("job_id") @db.Uuid
+
+  task UpgradeTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  job  FotaJob     @relation(fields: [jobId], references: [jobId])
+
+  @@id([taskId, jobId])
+  @@map("task_job")
+}
+
+model FotaJob {
+  jobId String @id @default(dbgenerated("gen_random_uuid()")) @map("job_id") @db.Uuid
+
+  plantId BigInt @map("plant_id")
+  plant   Plant  @relation(fields: [plantId], references: [id])
+
+  loggerImei       String @map("logger_imei") @db.VarChar(20)
+  inverterSerialNo String @map("inverter_serial_no") @db.VarChar(50)
+
+  currentFirmware    String? @map("current_firmware") @db.VarChar(255)
+  newFirmwareVersion String  @map("new_firmware_version") @db.VarChar(255)
+
+  firmwareId String?   @map("firmware_id") @db.Uuid
+  firmware   Firmware? @relation(fields: [firmwareId], references: [id])
+
+  chipType   ChipType
+  updateType UpdateType @map("update_type")
+
+  firmwareUrl String @map("firmware_url")
+
+  status FotaJobStatus @default(PENDING)
+
+  failureReason String? @map("failure_reason")
+
+  stepTimeoutSeconds Int      @default(240) @map("step_timeout_seconds")
+  stepDeadlineAt     DateTime @map("step_deadline_at") @db.Timestamptz(6)
+
+  startedById BigInt @map("started_by")
+  startedBy   User   @relation(fields: [startedById], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  taskJobs    TaskJob[]
+  commandLogs FotaCommandLog[]
+
+  @@index([stepDeadlineAt], map: "idx_fota_job_deadline_watch")
+  @@map("fota_job")
+}
+
+model FotaConfig {
+  id                 Int      @id @default(1) @db.SmallInt
+  stepTimeoutSeconds Int      @default(240) @map("step_timeout_seconds")
+  updatedAt          DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@map("fota_config")
+}
+
+model FotaCommandLog {
+  id BigInt @id @default(autoincrement())
+
+  jobId String  @map("job_id") @db.Uuid
+  job   FotaJob @relation(fields: [jobId], references: [jobId], onDelete: Cascade)
+
+  stepSequence Int @map("step_sequence") @db.SmallInt
+  
+  commandSent String @map("command_sent")
+  rawResponse String? @map("raw_response")
+
+  parsedResult String? @map("parsed_result") @db.VarChar(100)
+
+  status CommandLogStatus @default(PENDING)
+
+  sentAt      DateTime  @default(now()) @map("sent_at") @db.Timestamptz(6)
+  respondedAt DateTime? @map("responded_at") @db.Timestamptz(6)
+
+  @@index([jobId], map: "idx_fota_command_log_job_id")
+  @@index([status], map: "idx_fota_command_log_status")
+  @@map("fota_command_log")
+}
+enum ChipType {
+  MASTER_DSP
+  SLAVE_DSP
+  CSB
+  DCDC_DSP
+  AFCI
+  BMS1
+  BMS2
+  LCD
+}
+
+enum UpdateType {
+  NORMAL
+  FORCE
+}
+
+enum FotaJobStatus {
+  PENDING
+  SENDING_INFORMATION
+  LINK_SAVED
+  DOWNLOADING
+  DOWNLOAD_COMPLETED
+  FLASHING
+  RESTARTING
+  COMPLETED
+  FAILED
+}
+
+enum CommandLogStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  TIMEOUT
 }
 
 enum RemoteSettingsTab {

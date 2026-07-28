@@ -14,8 +14,11 @@ export async function createOtherSettingsReadTask(
 	plantId: string,
 	deviceId: string,
 	createdById: bigint,
-): Promise<{ taskId: bigint }> {
-	await getScopedInverterOrThrow(
+): Promise<{
+    taskId: bigint;
+    macAddress: string;
+}> {
+	const inverter = await getScopedInverterOrThrow(
 		prisma,
 		scope,
 		plantId,
@@ -24,7 +27,7 @@ export async function createOtherSettingsReadTask(
 
 	const task = await prisma.deviceRemoteSettingTask.create({
 		data: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			kind: "settings",
 			tab: TAB,
 			payload: {},
@@ -38,6 +41,7 @@ export async function createOtherSettingsReadTask(
 
 	return {
 		taskId: task.id,
+		macAddress: inverter.macAddress,
 	};
 }
 
@@ -49,11 +53,11 @@ export async function getOtherSettingSettings(
 	rawSettings: Prisma.JsonValue | null;
 }> {
 	// ): Promise<OtherSettingSettings> {
-	await getScopedInverterOrThrow(prisma, scope, plantId, deviceId);
+	const inverter = await getScopedInverterOrThrow(prisma, scope, plantId, deviceId);
 
 	const row = await prisma.deviceRemoteSetting.findFirst({
 		where: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			tab: TAB,
 		},
 		orderBy: {
@@ -80,12 +84,15 @@ export async function submitOtherSettingSettings(
 	deviceId: string,
 	settings: OtherSettingSettings,
 	updatedById: bigint,
-): Promise<{ taskId: bigint }> {
+): Promise<{
+    taskId: bigint;
+    macAddress: string;
+}> {
 	const inverter = await getScopedInverterOrThrow(prisma, scope, plantId, deviceId);
 
 	const task = await prisma.deviceRemoteSettingTask.create({
 		data: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			kind: "settings",
 			tab: TAB,
 			payload: toInputJson(settings),
@@ -99,5 +106,6 @@ export async function submitOtherSettingSettings(
 
 	return {
 		taskId: task.id,
+		macAddress: inverter.macAddress,
 	};
 }

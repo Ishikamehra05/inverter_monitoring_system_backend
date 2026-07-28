@@ -14,8 +14,11 @@ export async function createfeatureParametersReadTask(
 	plantId: string,
 	deviceId: string,
 	createdById: bigint,
-): Promise<{ taskId: bigint }> {
-	await getScopedInverterOrThrow(
+): Promise<{
+    taskId: bigint;
+    macAddress: string;
+}> {
+	const inverter = await getScopedInverterOrThrow(
 		prisma,
 		scope,
 		plantId,
@@ -24,7 +27,7 @@ export async function createfeatureParametersReadTask(
 
 	const task = await prisma.deviceRemoteSettingTask.create({
 		data: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			kind: "settings",
 			tab: TAB,
 			payload: {},
@@ -38,6 +41,7 @@ export async function createfeatureParametersReadTask(
 
 	return {
 		taskId: task.id,
+		macAddress: inverter.macAddress,
 	};
 }
 export async function getFeatureParametersSettings(
@@ -48,11 +52,11 @@ export async function getFeatureParametersSettings(
 	rawSettings: Prisma.JsonValue | null;
 }> {
 	// ): Promise<FeatureParametersSettings> {
-	await getScopedInverterOrThrow(prisma, scope, plantId, deviceId);
+	const inverter = await getScopedInverterOrThrow(prisma, scope, plantId, deviceId);
 
 	const row = await prisma.deviceRemoteSetting.findFirst({
 		where: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			tab: TAB,
 		},
 		orderBy: {
@@ -79,12 +83,15 @@ export async function submitFeatureParametersSettings(
 	deviceId: string,
 	settings: FeatureParametersSettings,
 	updatedById: bigint,
-): Promise<{ taskId: bigint }> {
+): Promise<{
+    taskId: bigint;
+    macAddress: string;
+}> {
 	const inverter = await getScopedInverterOrThrow(prisma, scope, plantId, deviceId);
 
 	// const task = await prisma.$transaction(async (tx) => {
 	// 	const existing = await tx.deviceRemoteSetting.findUnique({
-	// 		where: { deviceInverterId_tab: { deviceInverterId: INVERTER_SERIAL_NUMBER, tab: TAB } },
+	// 		where: { deviceInverterId_tab: { deviceInverterId: BigInt(inverter.macAddress), tab: TAB } },
 	// 		select: { settings: true },
 	// 	});
 
@@ -94,14 +101,14 @@ export async function submitFeatureParametersSettings(
 	// 	};
 
 	// 	await tx.deviceRemoteSetting.upsert({
-	// 		where: { deviceInverterId_tab: { deviceInverterId: INVERTER_SERIAL_NUMBER, tab: TAB } },
-	// 		create: { deviceInverterId: INVERTER_SERIAL_NUMBER, tab: TAB, settings: toInputJson(merged), updatedById },
+	// 		where: { deviceInverterId_tab: { deviceInverterId: BigInt(inverter.macAddress), tab: TAB } },
+	// 		create: { deviceInverterId: BigInt(inverter.macAddress), tab: TAB, settings: toInputJson(merged), updatedById },
 	// 		update: { settings: toInputJson(merged), updatedById },
 	// 	});
 
 	// 	return tx.deviceRemoteSettingTask.create({
 	// 		data: {
-	// 			deviceInverterId: INVERTER_SERIAL_NUMBER,
+	// 			deviceInverterId: BigInt(inverter.macAddress),
 	// 			kind: 'settings',
 	// 			tab: TAB,
 	// 			payload: toInputJson(settings),
@@ -116,7 +123,7 @@ export async function submitFeatureParametersSettings(
 
 	const task = await prisma.deviceRemoteSettingTask.create({
 		data: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			kind: "settings",
 			tab: TAB,
 			payload: toInputJson(settings),
@@ -130,5 +137,6 @@ export async function submitFeatureParametersSettings(
 
 	return {
 		taskId: task.id,
+		macAddress: inverter.macAddress,
 	};
 }

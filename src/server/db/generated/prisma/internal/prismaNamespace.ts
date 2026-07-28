@@ -80,12 +80,12 @@ export type PrismaVersion = {
 }
 
 /**
- * Prisma Client JS version: 7.8.0
- * Query Engine version: 3c6e192761c0362d496ed980de936e2f3cebcd3a
+ * Prisma Client JS version: 7.9.0
+ * Query Engine version: e922089b7d7502aff4249d5da3420f6fa55fc6ad
  */
 export const prismaVersion: PrismaVersion = {
-  client: "7.8.0",
-  engine: "3c6e192761c0362d496ed980de936e2f3cebcd3a"
+  client: "7.9.0",
+  engine: "e922089b7d7502aff4249d5da3420f6fa55fc6ad"
 }
 
 /**
@@ -156,6 +156,19 @@ export type Subset<T, U> = {
 };
 
 /**
+ * Resolved type of the argument passed to the `PrismaClient` constructor.
+ *
+ * When called without a narrower options type (the common case), this resolves
+ * to `PrismaClientOptions` directly, which produces a clear TypeScript error
+ * message (`not assignable to parameter of type 'PrismaClientOptions'`) when
+ * the argument is missing or incomplete. When the user supplies a narrower
+ * options type (e.g. via a literal), it falls back to `Subset` to keep
+ * filtering out unknown properties.
+ */
+export type PrismaClientConstructorArgs<Options extends PrismaClientOptions> =
+  [PrismaClientOptions] extends [Options] ? PrismaClientOptions : Subset<Options, PrismaClientOptions>;
+
+/**
  * SelectSubset
  * @desc From `T` pick properties that exist in `U`. Simple version of Intersection.
  * Additionally, it validates, if both select and include are present. If the case, it errors.
@@ -187,7 +200,7 @@ type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
 export type XOR<T, U> =
   T extends object ?
   U extends object ?
-    (Without<T, U> & U) | (Without<U, T> & T)
+    ((Without<T, U> & U) | (Without<U, T> & T)) & object
   : U : T
 
 
@@ -406,7 +419,13 @@ export const ModelName = {
   RemoteSettingParameterMaster: 'RemoteSettingParameterMaster',
   RemoteSettingCommandMaster: 'RemoteSettingCommandMaster',
   DeviceRemoteSetting: 'DeviceRemoteSetting',
-  DeviceRemoteSettingTask: 'DeviceRemoteSettingTask'
+  DeviceRemoteSettingTask: 'DeviceRemoteSettingTask',
+  Firmware: 'Firmware',
+  UpgradeTask: 'UpgradeTask',
+  TaskJob: 'TaskJob',
+  FotaJob: 'FotaJob',
+  FotaConfig: 'FotaConfig',
+  FotaCommandLog: 'FotaCommandLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -422,7 +441,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "plant" | "deviceInverter" | "userPlantInverterMap" | "deviceInvertorStatus" | "deviceDatalogger" | "deviceLogs" | "deviceLogsLatest" | "deviceDailySummary" | "deviceDailySummaryPerLineChart" | "information_data" | "deviceConnectionStatus" | "fota" | "deviceCurrentStatus" | "deviceStatusHistory" | "plantCurrentStatus" | "deviceAlertState" | "alertEvent" | "faultDictionary" | "remoteSettingParameterMaster" | "remoteSettingCommandMaster" | "deviceRemoteSetting" | "deviceRemoteSettingTask"
+    modelProps: "user" | "plant" | "deviceInverter" | "userPlantInverterMap" | "deviceInvertorStatus" | "deviceDatalogger" | "deviceLogs" | "deviceLogsLatest" | "deviceDailySummary" | "deviceDailySummaryPerLineChart" | "information_data" | "deviceConnectionStatus" | "fota" | "deviceCurrentStatus" | "deviceStatusHistory" | "plantCurrentStatus" | "deviceAlertState" | "alertEvent" | "faultDictionary" | "remoteSettingParameterMaster" | "remoteSettingCommandMaster" | "deviceRemoteSetting" | "deviceRemoteSettingTask" | "firmware" | "upgradeTask" | "taskJob" | "fotaJob" | "fotaConfig" | "fotaCommandLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2128,6 +2147,450 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Firmware: {
+      payload: Prisma.$FirmwarePayload<ExtArgs>
+      fields: Prisma.FirmwareFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FirmwareFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FirmwarePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FirmwareFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FirmwarePayload>
+        }
+        findFirst: {
+          args: Prisma.FirmwareFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FirmwarePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FirmwareFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FirmwarePayload>
+        }
+        findMany: {
+          args: Prisma.FirmwareFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FirmwarePayload>[]
+        }
+        create: {
+          args: Prisma.FirmwareCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FirmwarePayload>
+        }
+        createMany: {
+          args: Prisma.FirmwareCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FirmwareCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FirmwarePayload>[]
+        }
+        delete: {
+          args: Prisma.FirmwareDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FirmwarePayload>
+        }
+        update: {
+          args: Prisma.FirmwareUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FirmwarePayload>
+        }
+        deleteMany: {
+          args: Prisma.FirmwareDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FirmwareUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FirmwareUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FirmwarePayload>[]
+        }
+        upsert: {
+          args: Prisma.FirmwareUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FirmwarePayload>
+        }
+        aggregate: {
+          args: Prisma.FirmwareAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFirmware>
+        }
+        groupBy: {
+          args: Prisma.FirmwareGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FirmwareGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FirmwareCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FirmwareCountAggregateOutputType> | number
+        }
+      }
+    }
+    UpgradeTask: {
+      payload: Prisma.$UpgradeTaskPayload<ExtArgs>
+      fields: Prisma.UpgradeTaskFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UpgradeTaskFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UpgradeTaskPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UpgradeTaskFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UpgradeTaskPayload>
+        }
+        findFirst: {
+          args: Prisma.UpgradeTaskFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UpgradeTaskPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UpgradeTaskFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UpgradeTaskPayload>
+        }
+        findMany: {
+          args: Prisma.UpgradeTaskFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UpgradeTaskPayload>[]
+        }
+        create: {
+          args: Prisma.UpgradeTaskCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UpgradeTaskPayload>
+        }
+        createMany: {
+          args: Prisma.UpgradeTaskCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UpgradeTaskCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UpgradeTaskPayload>[]
+        }
+        delete: {
+          args: Prisma.UpgradeTaskDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UpgradeTaskPayload>
+        }
+        update: {
+          args: Prisma.UpgradeTaskUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UpgradeTaskPayload>
+        }
+        deleteMany: {
+          args: Prisma.UpgradeTaskDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UpgradeTaskUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UpgradeTaskUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UpgradeTaskPayload>[]
+        }
+        upsert: {
+          args: Prisma.UpgradeTaskUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UpgradeTaskPayload>
+        }
+        aggregate: {
+          args: Prisma.UpgradeTaskAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUpgradeTask>
+        }
+        groupBy: {
+          args: Prisma.UpgradeTaskGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UpgradeTaskGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UpgradeTaskCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UpgradeTaskCountAggregateOutputType> | number
+        }
+      }
+    }
+    TaskJob: {
+      payload: Prisma.$TaskJobPayload<ExtArgs>
+      fields: Prisma.TaskJobFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TaskJobFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskJobPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TaskJobFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskJobPayload>
+        }
+        findFirst: {
+          args: Prisma.TaskJobFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskJobPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TaskJobFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskJobPayload>
+        }
+        findMany: {
+          args: Prisma.TaskJobFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskJobPayload>[]
+        }
+        create: {
+          args: Prisma.TaskJobCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskJobPayload>
+        }
+        createMany: {
+          args: Prisma.TaskJobCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TaskJobCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskJobPayload>[]
+        }
+        delete: {
+          args: Prisma.TaskJobDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskJobPayload>
+        }
+        update: {
+          args: Prisma.TaskJobUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskJobPayload>
+        }
+        deleteMany: {
+          args: Prisma.TaskJobDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TaskJobUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TaskJobUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskJobPayload>[]
+        }
+        upsert: {
+          args: Prisma.TaskJobUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskJobPayload>
+        }
+        aggregate: {
+          args: Prisma.TaskJobAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTaskJob>
+        }
+        groupBy: {
+          args: Prisma.TaskJobGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskJobGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TaskJobCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskJobCountAggregateOutputType> | number
+        }
+      }
+    }
+    FotaJob: {
+      payload: Prisma.$FotaJobPayload<ExtArgs>
+      fields: Prisma.FotaJobFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FotaJobFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaJobPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FotaJobFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaJobPayload>
+        }
+        findFirst: {
+          args: Prisma.FotaJobFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaJobPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FotaJobFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaJobPayload>
+        }
+        findMany: {
+          args: Prisma.FotaJobFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaJobPayload>[]
+        }
+        create: {
+          args: Prisma.FotaJobCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaJobPayload>
+        }
+        createMany: {
+          args: Prisma.FotaJobCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FotaJobCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaJobPayload>[]
+        }
+        delete: {
+          args: Prisma.FotaJobDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaJobPayload>
+        }
+        update: {
+          args: Prisma.FotaJobUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaJobPayload>
+        }
+        deleteMany: {
+          args: Prisma.FotaJobDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FotaJobUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FotaJobUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaJobPayload>[]
+        }
+        upsert: {
+          args: Prisma.FotaJobUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaJobPayload>
+        }
+        aggregate: {
+          args: Prisma.FotaJobAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFotaJob>
+        }
+        groupBy: {
+          args: Prisma.FotaJobGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FotaJobGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FotaJobCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FotaJobCountAggregateOutputType> | number
+        }
+      }
+    }
+    FotaConfig: {
+      payload: Prisma.$FotaConfigPayload<ExtArgs>
+      fields: Prisma.FotaConfigFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FotaConfigFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaConfigPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FotaConfigFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaConfigPayload>
+        }
+        findFirst: {
+          args: Prisma.FotaConfigFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaConfigPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FotaConfigFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaConfigPayload>
+        }
+        findMany: {
+          args: Prisma.FotaConfigFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaConfigPayload>[]
+        }
+        create: {
+          args: Prisma.FotaConfigCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaConfigPayload>
+        }
+        createMany: {
+          args: Prisma.FotaConfigCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FotaConfigCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaConfigPayload>[]
+        }
+        delete: {
+          args: Prisma.FotaConfigDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaConfigPayload>
+        }
+        update: {
+          args: Prisma.FotaConfigUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaConfigPayload>
+        }
+        deleteMany: {
+          args: Prisma.FotaConfigDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FotaConfigUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FotaConfigUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaConfigPayload>[]
+        }
+        upsert: {
+          args: Prisma.FotaConfigUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaConfigPayload>
+        }
+        aggregate: {
+          args: Prisma.FotaConfigAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFotaConfig>
+        }
+        groupBy: {
+          args: Prisma.FotaConfigGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FotaConfigGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FotaConfigCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FotaConfigCountAggregateOutputType> | number
+        }
+      }
+    }
+    FotaCommandLog: {
+      payload: Prisma.$FotaCommandLogPayload<ExtArgs>
+      fields: Prisma.FotaCommandLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FotaCommandLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaCommandLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FotaCommandLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaCommandLogPayload>
+        }
+        findFirst: {
+          args: Prisma.FotaCommandLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaCommandLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FotaCommandLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaCommandLogPayload>
+        }
+        findMany: {
+          args: Prisma.FotaCommandLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaCommandLogPayload>[]
+        }
+        create: {
+          args: Prisma.FotaCommandLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaCommandLogPayload>
+        }
+        createMany: {
+          args: Prisma.FotaCommandLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FotaCommandLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaCommandLogPayload>[]
+        }
+        delete: {
+          args: Prisma.FotaCommandLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaCommandLogPayload>
+        }
+        update: {
+          args: Prisma.FotaCommandLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaCommandLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.FotaCommandLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FotaCommandLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FotaCommandLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaCommandLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.FotaCommandLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FotaCommandLogPayload>
+        }
+        aggregate: {
+          args: Prisma.FotaCommandLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFotaCommandLog>
+        }
+        groupBy: {
+          args: Prisma.FotaCommandLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FotaCommandLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FotaCommandLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FotaCommandLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2365,6 +2828,7 @@ export const DeviceLogsLatestScalarFieldEnum = {
   id: 'id',
   sno: 'sno',
   inverterName: 'inverterName',
+  macAddress: 'macAddress',
   dayDate: 'dayDate',
   latestTimestamp: 'latestTimestamp',
   sourceLogId: 'sourceLogId',
@@ -2667,6 +3131,89 @@ export const DeviceRemoteSettingTaskScalarFieldEnum = {
 export type DeviceRemoteSettingTaskScalarFieldEnum = (typeof DeviceRemoteSettingTaskScalarFieldEnum)[keyof typeof DeviceRemoteSettingTaskScalarFieldEnum]
 
 
+export const FirmwareScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  chipType: 'chipType',
+  version: 'version',
+  remark: 'remark',
+  filePath: 'filePath',
+  fileSize: 'fileSize',
+  createdById: 'createdById',
+  createdTime: 'createdTime',
+  updatedTime: 'updatedTime',
+  deletedAt: 'deletedAt'
+} as const
+
+export type FirmwareScalarFieldEnum = (typeof FirmwareScalarFieldEnum)[keyof typeof FirmwareScalarFieldEnum]
+
+
+export const UpgradeTaskScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UpgradeTaskScalarFieldEnum = (typeof UpgradeTaskScalarFieldEnum)[keyof typeof UpgradeTaskScalarFieldEnum]
+
+
+export const TaskJobScalarFieldEnum = {
+  taskId: 'taskId',
+  jobId: 'jobId'
+} as const
+
+export type TaskJobScalarFieldEnum = (typeof TaskJobScalarFieldEnum)[keyof typeof TaskJobScalarFieldEnum]
+
+
+export const FotaJobScalarFieldEnum = {
+  jobId: 'jobId',
+  plantId: 'plantId',
+  loggerImei: 'loggerImei',
+  inverterSerialNo: 'inverterSerialNo',
+  currentFirmware: 'currentFirmware',
+  newFirmwareVersion: 'newFirmwareVersion',
+  firmwareId: 'firmwareId',
+  chipType: 'chipType',
+  updateType: 'updateType',
+  firmwareUrl: 'firmwareUrl',
+  status: 'status',
+  failureReason: 'failureReason',
+  stepTimeoutSeconds: 'stepTimeoutSeconds',
+  stepDeadlineAt: 'stepDeadlineAt',
+  startedById: 'startedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FotaJobScalarFieldEnum = (typeof FotaJobScalarFieldEnum)[keyof typeof FotaJobScalarFieldEnum]
+
+
+export const FotaConfigScalarFieldEnum = {
+  id: 'id',
+  stepTimeoutSeconds: 'stepTimeoutSeconds',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FotaConfigScalarFieldEnum = (typeof FotaConfigScalarFieldEnum)[keyof typeof FotaConfigScalarFieldEnum]
+
+
+export const FotaCommandLogScalarFieldEnum = {
+  id: 'id',
+  jobId: 'jobId',
+  stepSequence: 'stepSequence',
+  commandSent: 'commandSent',
+  rawResponse: 'rawResponse',
+  parsedResult: 'parsedResult',
+  status: 'status',
+  sentAt: 'sentAt',
+  respondedAt: 'respondedAt'
+} as const
+
+export type FotaCommandLogScalarFieldEnum = (typeof FotaCommandLogScalarFieldEnum)[keyof typeof FotaCommandLogScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2937,6 +3484,62 @@ export type EnumRemoteSettingsTaskStatusFieldRefInput<$PrismaModel> = FieldRefIn
 export type ListEnumRemoteSettingsTaskStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RemoteSettingsTaskStatus[]'>
     
 
+
+/**
+ * Reference to a field of type 'ChipType'
+ */
+export type EnumChipTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ChipType'>
+    
+
+
+/**
+ * Reference to a field of type 'ChipType[]'
+ */
+export type ListEnumChipTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ChipType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'UpdateType'
+ */
+export type EnumUpdateTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UpdateType'>
+    
+
+
+/**
+ * Reference to a field of type 'UpdateType[]'
+ */
+export type ListEnumUpdateTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UpdateType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'FotaJobStatus'
+ */
+export type EnumFotaJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FotaJobStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'FotaJobStatus[]'
+ */
+export type ListEnumFotaJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FotaJobStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CommandLogStatus'
+ */
+export type EnumCommandLogStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CommandLogStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'CommandLogStatus[]'
+ */
+export type ListEnumCommandLogStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CommandLogStatus[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -2947,19 +3550,10 @@ export type BatchPayload = {
 export const defineExtension = runtime.Extensions.defineExtension as unknown as runtime.Types.Extensions.ExtendsHook<"define", TypeMapCb, runtime.Types.Extensions.DefaultArgs>
 export type DefaultPrismaClient = PrismaClient
 export type ErrorFormat = 'pretty' | 'colorless' | 'minimal'
-export type PrismaClientOptions = ({
-  /**
-   * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-pg`.
-   */
-  adapter: runtime.SqlDriverAdapterFactory
-  accelerateUrl?: never
-} | {
-  /**
-   * Prisma Accelerate URL allowing the client to connect through Accelerate instead of a direct database.
-   */
-  accelerateUrl: string
-  adapter?: never
-}) & {
+/**
+ * Options common to all variants of `PrismaClientOptions`, regardless of whether you connect to your database through a driver adapter or through Prisma Accelerate.
+ */
+export interface PrismaClientBaseOptions {
   /**
    * @default "colorless"
    */
@@ -3046,6 +3640,56 @@ export type PrismaClientOptions = ({
    */
   queryPlanCacheMaxSize?: number
 }
+
+/**
+ * `PrismaClient` options for connecting to your database through Prisma Accelerate instead of a driver adapter.
+ * 
+ * Learn more: https://pris.ly/d/accelerate
+ */
+export interface PrismaClientOptionsWithAccelerateUrl extends PrismaClientBaseOptions {
+  /**
+   * The Prisma Accelerate connection URL. Use this option to connect to your database through Prisma Accelerate instead of using a driver adapter to connect directly.
+   * 
+   * Learn more: https://pris.ly/d/accelerate
+   */
+  accelerateUrl: string
+  adapter?: never
+}
+
+/**
+ * `PrismaClient` options for connecting to your database through a driver adapter. This is the common case in Prisma 7.
+ * 
+ * Learn more: https://pris.ly/d/driver-adapters
+ */
+export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions {
+  /**
+   * A driver adapter that PrismaClient uses to connect to your database, such as the ones provided by `@prisma/adapter-pg`, `@prisma/adapter-libsql`, `@prisma/adapter-planetscale`, etc.
+   * 
+   * A driver adapter is **required** unless you connect to your database through Prisma Accelerate (in which case use `accelerateUrl` instead).
+   * 
+   * Learn more: https://pris.ly/d/driver-adapters
+   * 
+   * @example
+   * ```ts
+   * import { PrismaPg } from '@prisma/adapter-pg'
+   * import { PrismaClient } from './generated/prisma/client'
+   * 
+   * const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+   * const prisma = new PrismaClient({ adapter })
+   * ```
+   */
+  adapter: runtime.SqlDriverAdapterFactory
+  accelerateUrl?: never
+}
+
+/**
+ * Options passed to the `PrismaClient` constructor.
+ * 
+ * A driver adapter (or, alternatively, a Prisma Accelerate URL) is **required**. See {@link PrismaClientOptionsWithAdapter} and {@link PrismaClientOptionsWithAccelerateUrl} for the two variants. All other properties live in {@link PrismaClientBaseOptions} and are optional.
+ * 
+ * Learn more about driver adapters: https://pris.ly/d/driver-adapters
+ */
+export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   plant?: Prisma.PlantOmit
@@ -3070,6 +3714,12 @@ export type GlobalOmitConfig = {
   remoteSettingCommandMaster?: Prisma.RemoteSettingCommandMasterOmit
   deviceRemoteSetting?: Prisma.DeviceRemoteSettingOmit
   deviceRemoteSettingTask?: Prisma.DeviceRemoteSettingTaskOmit
+  firmware?: Prisma.FirmwareOmit
+  upgradeTask?: Prisma.UpgradeTaskOmit
+  taskJob?: Prisma.TaskJobOmit
+  fotaJob?: Prisma.FotaJobOmit
+  fotaConfig?: Prisma.FotaConfigOmit
+  fotaCommandLog?: Prisma.FotaCommandLogOmit
 }
 
 /* Types for Logging */

@@ -73,7 +73,13 @@ export const ModelName = {
   RemoteSettingParameterMaster: 'RemoteSettingParameterMaster',
   RemoteSettingCommandMaster: 'RemoteSettingCommandMaster',
   DeviceRemoteSetting: 'DeviceRemoteSetting',
-  DeviceRemoteSettingTask: 'DeviceRemoteSettingTask'
+  DeviceRemoteSettingTask: 'DeviceRemoteSettingTask',
+  Firmware: 'Firmware',
+  UpgradeTask: 'UpgradeTask',
+  TaskJob: 'TaskJob',
+  FotaJob: 'FotaJob',
+  FotaConfig: 'FotaConfig',
+  FotaCommandLog: 'FotaCommandLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -290,6 +296,7 @@ export const DeviceLogsLatestScalarFieldEnum = {
   id: 'id',
   sno: 'sno',
   inverterName: 'inverterName',
+  macAddress: 'macAddress',
   dayDate: 'dayDate',
   latestTimestamp: 'latestTimestamp',
   sourceLogId: 'sourceLogId',
@@ -590,6 +597,89 @@ export const DeviceRemoteSettingTaskScalarFieldEnum = {
 } as const
 
 export type DeviceRemoteSettingTaskScalarFieldEnum = (typeof DeviceRemoteSettingTaskScalarFieldEnum)[keyof typeof DeviceRemoteSettingTaskScalarFieldEnum]
+
+
+export const FirmwareScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  chipType: 'chipType',
+  version: 'version',
+  remark: 'remark',
+  filePath: 'filePath',
+  fileSize: 'fileSize',
+  createdById: 'createdById',
+  createdTime: 'createdTime',
+  updatedTime: 'updatedTime',
+  deletedAt: 'deletedAt'
+} as const
+
+export type FirmwareScalarFieldEnum = (typeof FirmwareScalarFieldEnum)[keyof typeof FirmwareScalarFieldEnum]
+
+
+export const UpgradeTaskScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UpgradeTaskScalarFieldEnum = (typeof UpgradeTaskScalarFieldEnum)[keyof typeof UpgradeTaskScalarFieldEnum]
+
+
+export const TaskJobScalarFieldEnum = {
+  taskId: 'taskId',
+  jobId: 'jobId'
+} as const
+
+export type TaskJobScalarFieldEnum = (typeof TaskJobScalarFieldEnum)[keyof typeof TaskJobScalarFieldEnum]
+
+
+export const FotaJobScalarFieldEnum = {
+  jobId: 'jobId',
+  plantId: 'plantId',
+  loggerImei: 'loggerImei',
+  inverterSerialNo: 'inverterSerialNo',
+  currentFirmware: 'currentFirmware',
+  newFirmwareVersion: 'newFirmwareVersion',
+  firmwareId: 'firmwareId',
+  chipType: 'chipType',
+  updateType: 'updateType',
+  firmwareUrl: 'firmwareUrl',
+  status: 'status',
+  failureReason: 'failureReason',
+  stepTimeoutSeconds: 'stepTimeoutSeconds',
+  stepDeadlineAt: 'stepDeadlineAt',
+  startedById: 'startedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FotaJobScalarFieldEnum = (typeof FotaJobScalarFieldEnum)[keyof typeof FotaJobScalarFieldEnum]
+
+
+export const FotaConfigScalarFieldEnum = {
+  id: 'id',
+  stepTimeoutSeconds: 'stepTimeoutSeconds',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FotaConfigScalarFieldEnum = (typeof FotaConfigScalarFieldEnum)[keyof typeof FotaConfigScalarFieldEnum]
+
+
+export const FotaCommandLogScalarFieldEnum = {
+  id: 'id',
+  jobId: 'jobId',
+  stepSequence: 'stepSequence',
+  commandSent: 'commandSent',
+  rawResponse: 'rawResponse',
+  parsedResult: 'parsedResult',
+  status: 'status',
+  sentAt: 'sentAt',
+  respondedAt: 'respondedAt'
+} as const
+
+export type FotaCommandLogScalarFieldEnum = (typeof FotaCommandLogScalarFieldEnum)[keyof typeof FotaCommandLogScalarFieldEnum]
 
 
 export const SortOrder = {

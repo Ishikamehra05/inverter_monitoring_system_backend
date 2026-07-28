@@ -55,8 +55,11 @@ export async function createGridParametersReadTask(
 	plantId: string,
 	deviceId: string,
 	createdById: bigint,
-): Promise<{ taskId: bigint }> {
-	await getScopedInverterOrThrow(
+): Promise<{
+    taskId: bigint;
+    macAddress: string;
+}> {
+	const inverter = await getScopedInverterOrThrow(
 		prisma,
 		scope,
 		plantId,
@@ -65,7 +68,7 @@ export async function createGridParametersReadTask(
 
 	const task = await prisma.deviceRemoteSettingTask.create({
 		data: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			kind: "settings",
 			tab: TAB,
 			payload: {},
@@ -79,6 +82,7 @@ export async function createGridParametersReadTask(
 
 	return {
 		taskId: task.id,
+		macAddress: inverter.macAddress,
 	};
 }
 export async function getGridParametersSettings(
@@ -88,11 +92,16 @@ export async function getGridParametersSettings(
 ): Promise<{
 	rawSettings: Prisma.JsonValue | null;
 }> {
-	await getScopedInverterOrThrow(prisma, scope, plantId, deviceId);
+	const inverter = await getScopedInverterOrThrow(
+		prisma,
+		scope,
+		plantId,
+		deviceId,
+	);
 
 	const row = await prisma.deviceRemoteSetting.findFirst({
 		where: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId: BigInt(inverter.macAddress),
 			tab: TAB,
 		},
 		orderBy: {
@@ -114,7 +123,10 @@ export async function submitGridParametersSettings(
 	deviceId: string,
 	settings: GridParametersSettings,
 	updatedById: bigint,
-): Promise<{ taskId: bigint }> {
+): Promise<{
+    taskId: bigint;
+    macAddress: string;
+}> {
 	const inverter = await getScopedInverterOrThrow(
 		prisma,
 		scope,
@@ -124,7 +136,7 @@ export async function submitGridParametersSettings(
 
 	const task = await prisma.deviceRemoteSettingTask.create({
 		data: {
-			deviceInverterId: INVERTER_SERIAL_NUMBER,
+			deviceInverterId:  BigInt(inverter.macAddress),
 			kind: "settings",
 			tab: TAB,
 			payload: toInputJson(settings),
@@ -138,5 +150,6 @@ export async function submitGridParametersSettings(
 
 	return {
 		taskId: task.id,
+		macAddress: inverter.macAddress,
 	};
 }

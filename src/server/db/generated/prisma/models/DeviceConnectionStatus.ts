@@ -181,8 +181,8 @@ export type DeviceConnectionStatusGroupByArgs<ExtArgs extends runtime.Types.Exte
 
 export type DeviceConnectionStatusGroupByOutputType = {
   id: bigint
-  serialNumber: string
-  macAddress: string | null
+  serialNumber: string | null
+  macAddress: string
   status: string
   lastSeenTime: Date | null
   _count: DeviceConnectionStatusCountAggregateOutputType | null
@@ -212,35 +212,35 @@ export type DeviceConnectionStatusWhereInput = {
   OR?: Prisma.DeviceConnectionStatusWhereInput[]
   NOT?: Prisma.DeviceConnectionStatusWhereInput | Prisma.DeviceConnectionStatusWhereInput[]
   id?: Prisma.BigIntFilter<"DeviceConnectionStatus"> | bigint | number
-  serialNumber?: Prisma.StringFilter<"DeviceConnectionStatus"> | string
-  macAddress?: Prisma.StringNullableFilter<"DeviceConnectionStatus"> | string | null
+  serialNumber?: Prisma.StringNullableFilter<"DeviceConnectionStatus"> | string | null
+  macAddress?: Prisma.StringFilter<"DeviceConnectionStatus"> | string
   status?: Prisma.StringFilter<"DeviceConnectionStatus"> | string
   lastSeenTime?: Prisma.DateTimeNullableFilter<"DeviceConnectionStatus"> | Date | string | null
 }
 
 export type DeviceConnectionStatusOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  serialNumber?: Prisma.SortOrder
-  macAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  serialNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  macAddress?: Prisma.SortOrder
   status?: Prisma.SortOrder
   lastSeenTime?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
 export type DeviceConnectionStatusWhereUniqueInput = Prisma.AtLeast<{
   id?: bigint | number
-  serialNumber?: string
+  macAddress?: string
   AND?: Prisma.DeviceConnectionStatusWhereInput | Prisma.DeviceConnectionStatusWhereInput[]
   OR?: Prisma.DeviceConnectionStatusWhereInput[]
   NOT?: Prisma.DeviceConnectionStatusWhereInput | Prisma.DeviceConnectionStatusWhereInput[]
-  macAddress?: Prisma.StringNullableFilter<"DeviceConnectionStatus"> | string | null
+  serialNumber?: Prisma.StringNullableFilter<"DeviceConnectionStatus"> | string | null
   status?: Prisma.StringFilter<"DeviceConnectionStatus"> | string
   lastSeenTime?: Prisma.DateTimeNullableFilter<"DeviceConnectionStatus"> | Date | string | null
-}, "id" | "serialNumber">
+}, "id" | "macAddress">
 
 export type DeviceConnectionStatusOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  serialNumber?: Prisma.SortOrder
-  macAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  serialNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  macAddress?: Prisma.SortOrder
   status?: Prisma.SortOrder
   lastSeenTime?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DeviceConnectionStatusCountOrderByAggregateInput
@@ -255,64 +255,64 @@ export type DeviceConnectionStatusScalarWhereWithAggregatesInput = {
   OR?: Prisma.DeviceConnectionStatusScalarWhereWithAggregatesInput[]
   NOT?: Prisma.DeviceConnectionStatusScalarWhereWithAggregatesInput | Prisma.DeviceConnectionStatusScalarWhereWithAggregatesInput[]
   id?: Prisma.BigIntWithAggregatesFilter<"DeviceConnectionStatus"> | bigint | number
-  serialNumber?: Prisma.StringWithAggregatesFilter<"DeviceConnectionStatus"> | string
-  macAddress?: Prisma.StringNullableWithAggregatesFilter<"DeviceConnectionStatus"> | string | null
+  serialNumber?: Prisma.StringNullableWithAggregatesFilter<"DeviceConnectionStatus"> | string | null
+  macAddress?: Prisma.StringWithAggregatesFilter<"DeviceConnectionStatus"> | string
   status?: Prisma.StringWithAggregatesFilter<"DeviceConnectionStatus"> | string
   lastSeenTime?: Prisma.DateTimeNullableWithAggregatesFilter<"DeviceConnectionStatus"> | Date | string | null
 }
 
 export type DeviceConnectionStatusCreateInput = {
   id?: bigint | number
-  serialNumber: string
-  macAddress?: string | null
+  serialNumber?: string | null
+  macAddress: string
   status: string
   lastSeenTime?: Date | string | null
 }
 
 export type DeviceConnectionStatusUncheckedCreateInput = {
   id?: bigint | number
-  serialNumber: string
-  macAddress?: string | null
+  serialNumber?: string | null
+  macAddress: string
   status: string
   lastSeenTime?: Date | string | null
 }
 
 export type DeviceConnectionStatusUpdateInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
-  serialNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   lastSeenTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type DeviceConnectionStatusUncheckedUpdateInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
-  serialNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   lastSeenTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type DeviceConnectionStatusCreateManyInput = {
   id?: bigint | number
-  serialNumber: string
-  macAddress?: string | null
+  serialNumber?: string | null
+  macAddress: string
   status: string
   lastSeenTime?: Date | string | null
 }
 
 export type DeviceConnectionStatusUpdateManyMutationInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
-  serialNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   lastSeenTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type DeviceConnectionStatusUncheckedUpdateManyInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
-  serialNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   lastSeenTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -390,8 +390,8 @@ export type $DeviceConnectionStatusPayload<ExtArgs extends runtime.Types.Extensi
   objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: bigint
-    serialNumber: string
-    macAddress: string | null
+    serialNumber: string | null
+    macAddress: string
     status: string
     lastSeenTime: Date | null
   }, ExtArgs["result"]["deviceConnectionStatus"]>

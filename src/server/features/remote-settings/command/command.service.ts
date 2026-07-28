@@ -7,6 +7,7 @@ import { getCommandReadPattern, getCommandRegisterMap, getCommandWritePattern } 
 import { pickRegisters } from '../shared/parameter-master';
 import { submitCommandAction } from './command.repository';
 import type { CommandAction } from './command.schema';
+import { waitForTask } from "../shared/remote-setting-task.repository";
 
 async function resolveScope(user: User, fromService?: boolean, targetEndUserId?: string): Promise<string[]> {
 	const baseScope = await resolveUserScope(user);
@@ -56,7 +57,7 @@ export interface SubmitCommandResult {
 
 export async function submitCommand(params: SubmitCommandParams): Promise<SubmitCommandResult> {
 	const scope = await resolveScope(params.user, params.fromService, params.targetEndUserId);
-	const result = await submitCommandAction(
+	const task = await submitCommandAction(
 		scope,
 		params.plantId,
 		params.deviceId,
@@ -68,7 +69,31 @@ export async function submitCommand(params: SubmitCommandParams): Promise<Submit
 	const registers = pickRegisters(registerMap, Object.keys(params.command));
 	const read_pattern = await getCommandReadPattern();
 	const { pattern: write_pattern, unmappedFields: unmapped_fields } = await getCommandWritePattern(params.command);
-	const mqtt_published = await publishRemoteSettingPattern(write_pattern);
-
-	return { ...result, registers, read_pattern, write_pattern, unmapped_fields, request_data: params.command, mqtt_published };
-}
+	const mqtt_published = await publishRemoteSettingPattern(task.macAddress, write_pattern);
+		if (!mqtt_published) {
+			throw new ApiError(500, "Failed to publish MQTT command.");
+		}
+	
+		const writeResult = await waitForTask(task.taskId);
+	
+		if (!writeResult.success) {
+			if (writeResult.status === "failed") {
+				throw new ApiError(400, "Device rejected the write request.");
+			}
+	
+			throw new ApiError(
+				408,
+				"Device did not respond.",
+			);
+		}
+	
+		return {
+			taskId: task.taskId.toString(),
+			registers,
+			read_pattern,
+			write_pattern,
+			unmapped_fields,
+			request_data: params.command,
+			mqtt_published,
+		};
+	}

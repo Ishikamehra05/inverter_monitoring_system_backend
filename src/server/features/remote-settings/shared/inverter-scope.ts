@@ -10,6 +10,7 @@ import { ApiError } from '@/server/utils/api-error';
 export interface ScopedInverter {
 	id: bigint;
 	serialNumber: string;
+	macAddress: string;
 }
 
 function parseDeviceId(deviceId: string): bigint {
@@ -49,16 +50,70 @@ export async function getScopedInverterOrThrow(
 
 	const parsedDeviceId = parseDeviceId(deviceId);
 
+	console.log("[REMOTE SETTINGS] Looking up inverter", {
+		deviceId,
+		parsedDeviceId: parsedDeviceId.toString(),
+		plantId,
+	});
+
 	const inverter = await dbClient.deviceInverter.findFirst({
-		where: { id: parsedDeviceId, plantId: BigInt(plantId), deletedAt: null },
-		select: { id: true, serialNumber: true },
+		where: {
+			id: parsedDeviceId,
+			plantId: BigInt(plantId),
+			deletedAt: null,
+		},
+		select: {
+			id: true,
+			serialNumber: true,
+		},
 	});
 
 	if (!inverter) {
-		throw new ApiError(404, 'Device not found. Remote settings are only available for inverters.');
+		throw new ApiError(
+			404,
+			'Device not found. Remote settings are only available for inverters.',
+		);
 	}
 
-	return inverter;
+	console.log("[REMOTE SETTINGS] Inverter Found", {
+		id: inverter.id.toString(),
+		serialNumber: inverter.serialNumber,
+	});
+
+	const latestLog = await dbClient.deviceLogsLatest.findFirst({
+		where: {
+			sno: inverter.serialNumber,
+		},
+		orderBy: {
+			latestTimestamp: "desc",
+		},
+		select: {
+			macAddress: true,
+		},
+	});
+
+	console.log("[REMOTE SETTINGS] Latest Log", {
+		sno: inverter.serialNumber,
+		macAddress: latestLog?.macAddress,
+	});
+
+	if (!latestLog?.macAddress) {
+		throw new ApiError(
+			404,
+			"MAC address not found for this inverter."
+		);
+	}
+
+	console.log("[REMOTE SETTINGS] Final Device", {
+		id: inverter.id.toString(),
+		serialNumber: inverter.serialNumber,
+		macAddress: latestLog.macAddress,
+	});
+
+	return {
+		...inverter,
+		macAddress: latestLog.macAddress,
+	};
 }
 
 export { prisma };

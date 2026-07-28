@@ -66,11 +66,27 @@ export interface DeviceLatestRecord {
   communicationModuleSn: string;
 }
 
+export interface ModuleLatestRecord {
+  sno: string;
+  status: string;
+  mac_address: string | null;
+  device_model: string | null;
+  firmware_version: string | null;
+}
+
 export interface SearchDeviceResult {
   status: 200 | 404;
   message: string;
   data?: {
     device: DeviceLatestRecord;
+  };
+}
+
+export interface SearchModuleResult {
+  status: 200 | 404;
+  message: string;
+  data?: {
+    device: ModuleLatestRecord;
   };
 }
 
@@ -264,7 +280,7 @@ export class UserService {
   }
   constructor(
     private readonly userRepository: UserRepository = new UserRepository(),
-  ) {}
+  ) { }
 
   private isRoleAllowedForSubAccountManagement(
     role: string | undefined,
@@ -560,6 +576,33 @@ export class UserService {
           communicationModuleSn: device.sno,
           createdAt: device.createdAt.toString(),
           updatedAt: device.updatedAt.toString(),
+        },
+      },
+    };
+  }
+
+  async searchDeviceByModule(
+    sno: string,
+  ): Promise<SearchModuleResult> {
+    const device = await this.userRepository.findLatestDeviceByModule(sno);
+
+    if (!device) {
+      return {
+        status: 404,
+        message: "Device not found.",
+      };
+    }
+
+    return {
+      status: 200,
+      message: "Device found successfully.",
+      data: {
+        device: {
+          sno: device.sno,
+          status: device.status,
+          mac_address: device.mac_address,
+          device_model: device.device_model,
+          firmware_version: device.firmware_version,
         },
       },
     };

@@ -116,7 +116,7 @@ export async function getGridParameters(
 	);
 
 	const mqtt_published =
-		await publishRemoteSettingPattern(read_pattern);
+		await publishRemoteSettingPattern(task.macAddress, read_pattern);
 
 	if (!mqtt_published) {
 		throw new ApiError(
@@ -204,7 +204,7 @@ export async function submitGridParameters(
 	} = await getWritePattern(TAB, params.settings);
 
 	const mqtt_published =
-		await publishRemoteSettingPattern(write_pattern);
+		await publishRemoteSettingPattern(task.macAddress, write_pattern);
 
 	if (!mqtt_published) {
 		throw new ApiError(500, "Failed to publish MQTT command.");
