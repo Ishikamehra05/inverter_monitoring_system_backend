@@ -1042,6 +1042,10 @@ export class DeviceService {
     return this.deviceRepository.deleteDevice(params);
   }
 
+  listInverters(params: { scope: string[] | "all"; page: number; pageSize: number; search?: string }) {
+		return this.deviceRepository.listInverters(params);
+	}
+
   async getDeviceChart(params: DeviceChartServiceParams) {
     const repoParams: DeviceChartContextParams = {
       plantId: params.plantId,
@@ -1393,4 +1397,8 @@ export async function getDeviceLogs(params: DeviceLogsServiceParams) {
 
 export async function exportDeviceLogs(params: DeviceLogsExportServiceParams) {
   return deviceService.exportDeviceLogs(params);
+}
+
+export async function listInverters(params: { scope: string[] | "all"; page: number; pageSize: number; search?: string }) {
+	return deviceService.listInverters(params);
 }

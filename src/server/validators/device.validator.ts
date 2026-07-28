@@ -10,6 +10,14 @@ export const DeviceListQueryValidator = z.object({
 	sortOrder: z.enum(['asc', 'desc']).default('asc'),
 });
 
+export const InverterListQueryValidator = z.object({
+	fromService: z.boolean().optional(),
+	targetEndUserId: z.string().optional(),
+	page: z.number().int().min(1).default(1),
+	pageSize: z.number().int().min(1).max(100).default(50),
+	search: z.string().optional(),
+});
+
 export const DeviceLiveRowsQueryValidator = z.object({
 	role: z.string().optional(),
 	fromService: z.boolean().optional(),

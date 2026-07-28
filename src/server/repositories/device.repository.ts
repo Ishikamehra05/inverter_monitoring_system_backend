@@ -1753,4 +1753,63 @@ export class DeviceRepository {
   // 		},
   // 	};
   // }
+
+  async listInverters(params: {
+    scope: string[] | "all";
+    page: number;
+    pageSize: number;
+    search?: string;
+  }): Promise<{
+    items: { id: string; name: string; serialNumber: string; status: string }[];
+    totalItems: number;
+  }> {
+    if (params.scope !== "all" && (!params.scope || params.scope.length === 0)) {
+      return { items: [], totalItems: 0 };
+    }
+
+    const where = {
+      deletedAt: null,
+      ...(params.scope === "all"
+        ? { plant: { deletedAt: null } }
+        : { plant: { userAccount: { in: params.scope }, deletedAt: null } }),
+      ...(params.search
+        ? {
+          OR: [
+            { name: { contains: params.search, mode: "insensitive" as const } },
+            { serialNumber: { contains: params.search, mode: "insensitive" as const } },
+          ],
+        }
+        : {}),
+    };
+
+    const [inverters, totalItems] = await Promise.all([
+      this.dbClient.deviceInverter.findMany({
+        where,
+        select: { id: true, name: true, serialNumber: true },
+        orderBy: { serialNumber: "asc" },
+        skip: (params.page - 1) * params.pageSize,
+        take: params.pageSize,
+      }),
+      this.dbClient.deviceInverter.count({ where }),
+    ]);
+
+    const serialNumbers = inverters.map((inverter) => inverter.serialNumber);
+
+    const connectionStatuses = await this.dbClient.deviceConnectionStatus.findMany({
+      where: { serialNumber: { in: serialNumbers } },
+      select: { serialNumber: true, status: true },
+    });
+
+    const statusMap = new Map(connectionStatuses.map((item) => [item.serialNumber, item.status]));
+
+    return {
+      items: inverters.map((inverter) => ({
+        id: String(inverter.id),
+        name: inverter.name ?? inverter.serialNumber,
+        serialNumber: inverter.serialNumber,
+        status: statusMap.get(inverter.serialNumber) ?? "offline",
+      })),
+      totalItems,
+    };
+  }
 }
