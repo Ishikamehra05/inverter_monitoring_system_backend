@@ -274,13 +274,59 @@ type ForgotPasswordInput = {
   confirmPassword: string;
 };
 
+export interface DataloggerLatestRecord {
+  id: bigint;
+  sno: string;
+  inverterName: string | null;
+  macAddress: string | null;
+  dayDate: Date;
+  latestTimestamp: Date;
+
+  dailyProduction: Decimal | null;
+  totalEnergy: Decimal | null;
+  totalHours: number | null;
+  currentPower: Decimal | null;
+
+  logger_status: number | null;
+  module_version_no: string | null;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SearchDataloggerResult {
+  status: 200 | 404;
+  message: string;
+  data?: {
+    datalogger: {
+      id: string;
+      sno: string;
+      inverterName: string | null;
+      macAddress: string | null;
+      dayDate: string;
+      latestTimestamp: string;
+      sourceLogId: string;
+      batchKey: string;
+      dailyProduction: Decimal | null;
+      totalEnergy: Decimal | null;
+      totalHours: number | null;
+      currentPower: Decimal | null;
+
+      logger_status: string | null;
+      module_version_no: string | null;
+
+      createdAt: string;
+      updatedAt: string;
+    };
+  };
+}
 export class UserService {
   static searchDeviceBySN(sno: string) {
     throw new Error("Method not implemented.");
   }
   constructor(
     private readonly userRepository: UserRepository = new UserRepository(),
-  ) { }
+  ) {}
 
   private isRoleAllowedForSubAccountManagement(
     role: string | undefined,
@@ -581,9 +627,47 @@ export class UserService {
     };
   }
 
-  async searchDeviceByModule(
-    sno: string,
-  ): Promise<SearchModuleResult> {
+  async searchDataloggerByMacAddress(
+    macAddress: string,
+  ): Promise<SearchDataloggerResult> {
+    const datalogger =
+      await this.userRepository.findLatestDataloggerByMacAddress(macAddress);
+
+    if (!datalogger) {
+      return {
+        status: 404,
+        message: "Datalogger not found.",
+      };
+    }
+
+    return {
+      status: 200,
+      message: "Datalogger found successfully.",
+      data: {
+        datalogger: {
+          id: datalogger.id.toString(),
+          sno: datalogger.sno,
+          inverterName: datalogger.inverterName,
+          macAddress: datalogger.macAddress,
+          dayDate: datalogger.dayDate.toISOString(),
+          latestTimestamp: datalogger.latestTimestamp.toISOString(),
+          sourceLogId: datalogger.sourceLogId.toString(),
+          batchKey: datalogger.batchKey,
+          dailyProduction: datalogger.dailyProduction,
+          totalEnergy: datalogger.totalEnergy,
+          totalHours: datalogger.totalHours,
+          currentPower: datalogger.currentPower,
+
+          logger_status: datalogger.logger_status,
+          module_version_no: datalogger.module_version_no,
+
+          createdAt: datalogger.createdAt.toISOString(),
+          updatedAt: datalogger.updatedAt.toISOString(),
+        },
+      },
+    };
+  }
+  async searchDeviceByModule(sno: string): Promise<SearchModuleResult> {
     const device = await this.userRepository.findLatestDeviceByModule(sno);
 
     if (!device) {
@@ -856,7 +940,10 @@ export class UserService {
       return accessError;
     }
 
-    const records = await this.userRepository.findScopedServiceAdmins(actorId, actorRole);
+    const records = await this.userRepository.findScopedServiceAdmins(
+      actorId,
+      actorRole,
+    );
     console.log("records", records);
 
     const deviceCountMap = await this.userRepository.getDeviceCountsByAccounts(

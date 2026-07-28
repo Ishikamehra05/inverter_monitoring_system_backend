@@ -6,8 +6,11 @@ import type {
   ServiceAdminEditInput,
   ServiceAdminUserListInput,
 } from "@/server/validators/user.validator";
-import { UserRole } from "../db/generated/prisma/client";
-import { DeviceLatestRecord, ModuleLatestRecord } from "../services/user.service";
+import { Prisma, UserRole } from "../db/generated/prisma/client";
+import {
+  DeviceLatestRecord,
+  ModuleLatestRecord,
+} from "../services/user.service";
 
 export interface UserDeleteRecord {
   id: bigint;
@@ -49,9 +52,30 @@ export interface ActorAccessRecord {
   role: string;
   isDeleted: boolean;
 }
+export interface DataloggerLatestRecord {
+  id: bigint;
+  sno: string;
+  inverterName: string | null;
+  macAddress: string | null;
 
+  dayDate: Date;
+  latestTimestamp: Date;
+  sourceLogId: BigInt;
+  batchKey: string;
+
+  dailyProduction: Prisma.Decimal | null;
+  totalEnergy: Prisma.Decimal | null;
+  totalHours: number | null;
+  currentPower: Prisma.Decimal | null;
+
+  logger_status: string | null;
+  module_version_no: string | null;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
 export class UserRepository {
-  constructor(private readonly dbClient: PrismaClient = prisma) { }
+  constructor(private readonly dbClient: PrismaClient = prisma) {}
 
   private buildWhere(roleType: UserRoleType, filters: UserListQueryInput) {
     const where: Record<string, unknown> = {};
@@ -296,43 +320,43 @@ export class UserRepository {
     };
   }
 
-async findLatestDeviceByModule(
-  sno: string,
-): Promise<ModuleLatestRecord | null> {
-  const [currentStatus, latestLog] = await Promise.all([
-    this.dbClient.deviceCurrentStatus.findUnique({
-      where: {
-        sno,
-      },
-      select: {
-        status: true,
-      },
-    }),
+  async findLatestDeviceByModule(
+    sno: string,
+  ): Promise<ModuleLatestRecord | null> {
+    const [currentStatus, latestLog] = await Promise.all([
+      this.dbClient.deviceCurrentStatus.findUnique({
+        where: {
+          sno,
+        },
+        select: {
+          status: true,
+        },
+      }),
 
-    this.dbClient.deviceLogs.findFirst({
-      where: {
-        sno,
-      },
-      orderBy: {
-        timestamp: "desc",
-      },
-      select: {
-        sno: true,
-        mac_address: true,
-        device_model: true,
-        firmware_version: true,
-      },
-    }),
-  ]);
+      this.dbClient.deviceLogs.findFirst({
+        where: {
+          sno,
+        },
+        orderBy: {
+          timestamp: "desc",
+        },
+        select: {
+          sno: true,
+          mac_address: true,
+          device_model: true,
+          firmware_version: true,
+        },
+      }),
+    ]);
 
-  return {
-    sno: latestLog?.sno ?? sno,
-    status: currentStatus?.status ?? "Offline",
-    mac_address: latestLog?.mac_address ?? null,
-    device_model: latestLog?.device_model ?? null,
-    firmware_version: latestLog?.firmware_version ?? null,
-  };
-}
+    return {
+      sno: latestLog?.sno ?? sno,
+      status: currentStatus?.status ?? "Offline",
+      mac_address: latestLog?.mac_address ?? null,
+      device_model: latestLog?.device_model ?? null,
+      firmware_version: latestLog?.firmware_version ?? null,
+    };
+  }
   async updateProfile(
     userId: bigint,
     payload: {
@@ -770,7 +794,69 @@ async findLatestDeviceByModule(
 
     return record ?? null;
   }
+  async findLatestDataloggerByMacAddress(
+    macAddress: string,
+  ): Promise<DataloggerLatestRecord | null> {
+    const record = await this.dbClient.deviceLogsLatest.findFirst({
+      where: {
+        macAddress,
+      },
+      orderBy: {
+        latestTimestamp: "desc",
+      },
+      select: {
+        id: true,
+        sno: true,
+        inverterName: true,
+        macAddress: true,
 
+        dayDate: true,
+        latestTimestamp: true,
+        sourceLogId: true,
+        batchKey: true,
+        dailyProduction: true,
+        totalEnergy: true,
+        totalHours: true,
+        currentPower: true,
+
+        createdAt: true,
+        updatedAt: true,
+
+        sourceLog: {
+          select: {
+            logger_status: true,
+            module_version_no: true,
+          },
+        },
+      },
+    });
+
+    if (!record) {
+      return null;
+    }
+
+    return {
+      id: record.id,
+      sno: record.sno,
+      inverterName: record.inverterName,
+      macAddress: record.macAddress,
+
+      dayDate: record.dayDate,
+      latestTimestamp: record.latestTimestamp,
+      sourceLogId: record.sourceLogId,
+      batchKey: record.batchKey,
+      dailyProduction: record.dailyProduction,
+      totalEnergy: record.totalEnergy,
+      totalHours: record.totalHours,
+      currentPower: record.currentPower,
+
+      logger_status: record.sourceLog?.logger_status ?? null,
+      module_version_no: record.sourceLog?.module_version_no ?? null,
+
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+    };
+  }
   async updateScopedServiceAdminById(
     id: bigint,
     assignedById: bigint,
@@ -928,9 +1014,7 @@ async findLatestDeviceByModule(
     for (const endUser of endUsers) {
       if (!endUser.assignedById) continue;
 
-      const adminAccount = adminAccountById.get(
-        String(endUser.assignedById),
-      );
+      const adminAccount = adminAccountById.get(String(endUser.assignedById));
 
       if (!adminAccount) continue;
 
@@ -1009,10 +1093,7 @@ async findLatestDeviceByModule(
       if (!adminAccount) continue;
 
       const current = deviceCountByAccount.get(adminAccount) ?? 0;
-      deviceCountByAccount.set(
-        adminAccount,
-        current + item._count._all,
-      );
+      deviceCountByAccount.set(adminAccount, current + item._count._all);
     }
 
     // Add datalogger count
@@ -1022,10 +1103,7 @@ async findLatestDeviceByModule(
       if (!adminAccount) continue;
 
       const current = deviceCountByAccount.get(adminAccount) ?? 0;
-      deviceCountByAccount.set(
-        adminAccount,
-        current + item._count._all,
-      );
+      deviceCountByAccount.set(adminAccount, current + item._count._all);
     }
 
     return deviceCountByAccount;

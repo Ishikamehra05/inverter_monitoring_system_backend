@@ -196,6 +196,10 @@ export const searchModuleRequestSchema = z.object({
   // plantId: z.string().trim().optional(),
 });
 
+export const searchDataloggerRequestSchema = z.object({
+  macAddress: z.string().trim().min(1, "Mac Address is required"),
+});
+
 export type SearchDeviceRequest = z.infer<typeof searchDeviceRequestSchema>;
 export type ChangePasswordValidator = z.infer<typeof ChangePasswordValidator>;
 
@@ -204,3 +208,6 @@ export type UserRoleTypeParamInput = z.infer<typeof userRoleTypeParamSchema>;
 export type UserRoleType = UserRoleTypeParamInput["role_type"];
 export type UserListQueryInput = z.infer<typeof userListQuerySchema>;
 export type UpdateProfileInput = z.infer<typeof UpdateProfileValidator>;
+export type SearchDataloggerRequest = z.infer<
+  typeof searchDataloggerRequestSchema
+>;
