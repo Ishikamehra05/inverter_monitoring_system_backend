@@ -650,6 +650,9 @@ export const FotaJobScalarFieldEnum = {
   failureReason: 'failureReason',
   stepTimeoutSeconds: 'stepTimeoutSeconds',
   stepDeadlineAt: 'stepDeadlineAt',
+  workerId: 'workerId',
+  claimedAt: 'claimedAt',
+  lastHeartbeatAt: 'lastHeartbeatAt',
   startedById: 'startedById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

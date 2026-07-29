@@ -683,6 +683,11 @@ model FotaJob {
   stepTimeoutSeconds Int      @default(240) @map("step_timeout_seconds")
   stepDeadlineAt     DateTime @map("step_deadline_at") @db.Timestamptz(6)
 
+  // New fields
+  workerId         String?   @map("worker_id") @db.VarChar(100)
+  claimedAt        DateTime? @map("claimed_at") @db.Timestamptz(6)
+  lastHeartbeatAt  DateTime? @map("last_heartbeat_at") @db.Timestamptz(6)
+
   startedById BigInt @map("started_by")
   startedBy   User   @relation(fields: [startedById], references: [id])
 
@@ -693,6 +698,10 @@ model FotaJob {
   commandLogs FotaCommandLog[]
 
   @@index([stepDeadlineAt], map: "idx_fota_job_deadline_watch")
+
+  // Normal index (optional, if desired)
+  @@index([lastHeartbeatAt], map: "idx_fota_job_last_heartbeat")
+
   @@map("fota_job")
 }
 

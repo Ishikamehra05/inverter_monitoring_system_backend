@@ -48,24 +48,31 @@ type CountRow = {
 	count: bigint | number | string;
 };
 
+// function formatDateTime(value: Date | string): string {
+// 	const date = value instanceof Date ? value : new Date(value);
+
+// 	if (Number.isNaN(date.getTime())) {
+// 		return String(value);
+// 	}
+
+// 	const pad = (part: number) => String(part).padStart(2, '0');
+
+// 	return [
+// 		date.getFullYear(),
+// 		pad(date.getMonth() + 1),
+// 		pad(date.getDate()),
+// 	].join('-') + ' ' + [
+// 		pad(date.getHours()),
+// 		pad(date.getMinutes()),
+// 		pad(date.getSeconds()),
+// 	].join(':');
+// }
+
 function formatDateTime(value: Date | string): string {
-	const date = value instanceof Date ? value : new Date(value);
+  const str =
+    value instanceof Date ? value.toISOString() : String(value);
 
-	if (Number.isNaN(date.getTime())) {
-		return String(value);
-	}
-
-	const pad = (part: number) => String(part).padStart(2, '0');
-
-	return [
-		date.getFullYear(),
-		pad(date.getMonth() + 1),
-		pad(date.getDate()),
-	].join('-') + ' ' + [
-		pad(date.getHours()),
-		pad(date.getMinutes()),
-		pad(date.getSeconds()),
-	].join(':');
+  return str.replace("T", " ").replace(/\.\d+Z?$/, "").replace("Z", "");
 }
 
 function mapFirmware(row: FirmwareRow) {

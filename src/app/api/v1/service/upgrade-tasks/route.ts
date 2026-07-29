@@ -12,6 +12,7 @@ import {
 	DEFAULT_STEP_TIMEOUT_SECONDS,
 	UPDATE_TYPES,
 } from '@/server/features/fota/constants';
+import path from "node:path";
 
 // A "Batch Task" (upgrade_task) pushes ONE firmware to MANY devices — the
 // firmware/chip type/update type are shared across the batch, per-device
@@ -45,7 +46,7 @@ const createUpgradeTaskSchema = z.object({
 // the UI (inverter->logger->plant join and a real firmware download URL are
 // both future work — see coding_action/Zcreate-job-01.md). These sentinels
 // let a submit go through in the meantime without touching the DB schema.
-const DEFAULT_LOGGER_IMEI = '-1';
+// const DEFAULT_LOGGER_IMEI = '-1';
 const DEFAULT_CURRENT_FIRMWARE = '-1';
 const DEFAULT_FIRMWARE_URL = 'http://-1';
 const PLACEHOLDER_PLANT_NAME = 'Unassigned';
@@ -62,27 +63,33 @@ const listUpgradeTasksQuerySchema = z.object({
 	pageSize: z.coerce.number().int().min(1).max(100).default(10),
 });
 
-type FirmwareLookupRow = { id: string; version: string; chip_type: string | null };
+type FirmwareLookupRow = { id: string; version: string; chip_type: string | null; file_path: string; };
 type PlantRow = { id: bigint };
 type ActiveConflictRow = { logger_imei: string; inverter_serial_no: string; job_id: string; status: string };
 
-function formatDateTime(value: Date): string {
-	const pad = (part: number) => String(part).padStart(2, '0');
-	return (
-		[value.getFullYear(), pad(value.getMonth() + 1), pad(value.getDate())].join('-') +
-		' ' +
-		[pad(value.getHours()), pad(value.getMinutes()), pad(value.getSeconds())].join(':')
-	);
+// function formatDateTime(value: Date): string {
+// 	const pad = (part: number) => String(part).padStart(2, '0');
+// 	return (
+// 		[value.getFullYear(), pad(value.getMonth() + 1), pad(value.getDate())].join('-') +
+// 		' ' +
+// 		[pad(value.getHours()), pad(value.getMinutes()), pad(value.getSeconds())].join(':')
+// 	);
+// }
+function formatDateTime(value: Date | string): string {
+	const str =
+		value instanceof Date ? value.toISOString() : String(value);
+
+	return str.replace("T", " ").replace(/\.\d+Z?$/, "").replace("Z", "");
 }
 
 async function resolveFirmware(
 	newFirmwareVersion: string,
 	chipType: string,
 	firmwareId: string | undefined,
-): Promise<{ ok: true; firmwareId: string } | { ok: false; message: string }> {
+): Promise<{ ok: true; firmwareId: string; firmwareUrl: string } | { ok: false; message: string }> {
 	if (firmwareId) {
 		const rows = await prisma.$queryRaw<FirmwareLookupRow[]>`
-			SELECT id::text, version, chip_type
+			SELECT id::text, version, chip_type, file_path
 			FROM firmware
 			WHERE id = ${firmwareId}::uuid AND deleted_at IS NULL
 			LIMIT 1
@@ -94,11 +101,11 @@ async function resolveFirmware(
 		if (row.version !== newFirmwareVersion || row.chip_type !== chipType) {
 			return { ok: false, message: 'firmwareId does not match newFirmwareVersion/chipType' };
 		}
-		return { ok: true, firmwareId: row.id };
+		return { ok: true, firmwareId: row.id, firmwareUrl: row.file_path.replace(/\\/g, "/"), };
 	}
 
 	const rows = await prisma.$queryRaw<FirmwareLookupRow[]>`
-		SELECT id::text, version, chip_type
+		SELECT id::text, version, chip_type, file_path
 		FROM firmware
 		WHERE version = ${newFirmwareVersion}
 			AND chip_type = ${chipType}::"ChipType"
@@ -113,7 +120,7 @@ async function resolveFirmware(
 			message: `newFirmwareVersion "${newFirmwareVersion}" was not found in the firmware catalog for chipType ${chipType}`,
 		};
 	}
-	return { ok: true, firmwareId: row.id };
+	return { ok: true, firmwareId: row.id, firmwareUrl: row.file_path.replace(/\\/g, "/"), };
 }
 
 // Finds (or, on first ever call, creates) the placeholder "Unassigned"
@@ -187,7 +194,19 @@ async function postUpgradeTask(request: NextRequest): Promise<Response> {
 	}
 
 	const data = parsed.data;
-	const firmwareUrl = data.firmwareUrl ?? DEFAULT_FIRMWARE_URL;
+	// const firmwareUrl = data.firmwareUrl ?? DEFAULT_FIRMWARE_URL;
+	const firmwareResolution = await resolveFirmware(
+		data.newFirmwareVersion,
+		data.chipType,
+		data.firmwareId,
+	);
+
+	if (!firmwareResolution.ok) {
+		return errorResponse(firmwareResolution.message, 400);
+	}
+
+	const firmwareUrl =
+		`${request.nextUrl.origin}/api/v1/service/firmware/${firmwareResolution.firmwareId}`;
 
 	let placeholderPlantId: bigint | null = null;
 	if (data.devices.some((device) => device.plantId === undefined)) {
@@ -199,6 +218,26 @@ async function postUpgradeTask(request: NextRequest): Promise<Response> {
 		}
 	}
 
+	const serialNumbers = data.devices.map((d) => d.inverterSerialNo);
+
+	const latestLogs = await prisma.deviceLogsLatest.findMany({
+		where: {
+			sno: {
+				in: serialNumbers,
+			},
+		},
+		select: {
+			sno: true,
+			macAddress: true,
+		},
+	});
+
+	const imeiMap = new Map(
+		latestLogs
+			.filter((row) => row.macAddress)
+			.map((row) => [row.sno, row.macAddress!]),
+	);
+
 	// Resolve every optional per-device field up front so the rest of this
 	// handler (duplicate check, conflict check, insert loop) only ever deals
 	// in concrete values, never `undefined`.
@@ -209,14 +248,31 @@ async function postUpgradeTask(request: NextRequest): Promise<Response> {
 		currentFirmware: string;
 	}[];
 	try {
-		resolvedDevices = data.devices.map((device) => ({
-			plantId: device.plantId !== undefined ? BigInt(device.plantId) : placeholderPlantId!,
-			loggerImei: device.loggerImei ?? DEFAULT_LOGGER_IMEI,
-			inverterSerialNo: device.inverterSerialNo,
-			currentFirmware: device.currentFirmware ?? DEFAULT_CURRENT_FIRMWARE,
-		}));
-	} catch {
-		return errorResponse('plantId must be a valid integer for every device', 400);
+		resolvedDevices = data.devices.map((device) => {
+			const loggerImei =
+				device.loggerImei ??
+				imeiMap.get(device.inverterSerialNo);
+
+			if (!loggerImei) {
+				throw new Error(
+					`Logger IMEI not found in device_logs_latest for inverter ${device.inverterSerialNo}`
+				);
+			}
+
+			return {
+				plantId:
+					device.plantId !== undefined
+						? BigInt(device.plantId)
+						: placeholderPlantId!,
+				loggerImei,
+				inverterSerialNo: device.inverterSerialNo,
+				currentFirmware:
+					device.currentFirmware ?? DEFAULT_CURRENT_FIRMWARE,
+			};
+		});
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		return errorResponse(message, 400);
 	}
 
 	// Duplicate devices within the same batch would otherwise collide on
@@ -243,10 +299,10 @@ async function postUpgradeTask(request: NextRequest): Promise<Response> {
 		return errorResponse(`Plant(s) not found: ${missingPlantIds.join(', ')}`, 404);
 	}
 
-	const firmwareResolution = await resolveFirmware(data.newFirmwareVersion, data.chipType, data.firmwareId);
-	if (!firmwareResolution.ok) {
-		return errorResponse(firmwareResolution.message, 400);
-	}
+	// const firmwareResolution = await resolveFirmware(data.newFirmwareVersion, data.chipType, data.firmwareId);
+	// if (!firmwareResolution.ok) {
+	// 	return errorResponse(firmwareResolution.message, 400);
+	// }
 
 	const imeis = resolvedDevices.map((device) => device.loggerImei);
 	const serials = resolvedDevices.map((device) => device.inverterSerialNo);

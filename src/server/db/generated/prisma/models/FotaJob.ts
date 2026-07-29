@@ -53,6 +53,9 @@ export type FotaJobMinAggregateOutputType = {
   failureReason: string | null
   stepTimeoutSeconds: number | null
   stepDeadlineAt: Date | null
+  workerId: string | null
+  claimedAt: Date | null
+  lastHeartbeatAt: Date | null
   startedById: bigint | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -73,6 +76,9 @@ export type FotaJobMaxAggregateOutputType = {
   failureReason: string | null
   stepTimeoutSeconds: number | null
   stepDeadlineAt: Date | null
+  workerId: string | null
+  claimedAt: Date | null
+  lastHeartbeatAt: Date | null
   startedById: bigint | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -93,6 +99,9 @@ export type FotaJobCountAggregateOutputType = {
   failureReason: number
   stepTimeoutSeconds: number
   stepDeadlineAt: number
+  workerId: number
+  claimedAt: number
+  lastHeartbeatAt: number
   startedById: number
   createdAt: number
   updatedAt: number
@@ -127,6 +136,9 @@ export type FotaJobMinAggregateInputType = {
   failureReason?: true
   stepTimeoutSeconds?: true
   stepDeadlineAt?: true
+  workerId?: true
+  claimedAt?: true
+  lastHeartbeatAt?: true
   startedById?: true
   createdAt?: true
   updatedAt?: true
@@ -147,6 +159,9 @@ export type FotaJobMaxAggregateInputType = {
   failureReason?: true
   stepTimeoutSeconds?: true
   stepDeadlineAt?: true
+  workerId?: true
+  claimedAt?: true
+  lastHeartbeatAt?: true
   startedById?: true
   createdAt?: true
   updatedAt?: true
@@ -167,6 +182,9 @@ export type FotaJobCountAggregateInputType = {
   failureReason?: true
   stepTimeoutSeconds?: true
   stepDeadlineAt?: true
+  workerId?: true
+  claimedAt?: true
+  lastHeartbeatAt?: true
   startedById?: true
   createdAt?: true
   updatedAt?: true
@@ -274,6 +292,9 @@ export type FotaJobGroupByOutputType = {
   failureReason: string | null
   stepTimeoutSeconds: number
   stepDeadlineAt: Date
+  workerId: string | null
+  claimedAt: Date | null
+  lastHeartbeatAt: Date | null
   startedById: bigint
   createdAt: Date
   updatedAt: Date
@@ -317,6 +338,9 @@ export type FotaJobWhereInput = {
   failureReason?: Prisma.StringNullableFilter<"FotaJob"> | string | null
   stepTimeoutSeconds?: Prisma.IntFilter<"FotaJob"> | number
   stepDeadlineAt?: Prisma.DateTimeFilter<"FotaJob"> | Date | string
+  workerId?: Prisma.StringNullableFilter<"FotaJob"> | string | null
+  claimedAt?: Prisma.DateTimeNullableFilter<"FotaJob"> | Date | string | null
+  lastHeartbeatAt?: Prisma.DateTimeNullableFilter<"FotaJob"> | Date | string | null
   startedById?: Prisma.BigIntFilter<"FotaJob"> | bigint | number
   createdAt?: Prisma.DateTimeFilter<"FotaJob"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FotaJob"> | Date | string
@@ -342,6 +366,9 @@ export type FotaJobOrderByWithRelationInput = {
   failureReason?: Prisma.SortOrderInput | Prisma.SortOrder
   stepTimeoutSeconds?: Prisma.SortOrder
   stepDeadlineAt?: Prisma.SortOrder
+  workerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  claimedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastHeartbeatAt?: Prisma.SortOrderInput | Prisma.SortOrder
   startedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -370,6 +397,9 @@ export type FotaJobWhereUniqueInput = Prisma.AtLeast<{
   failureReason?: Prisma.StringNullableFilter<"FotaJob"> | string | null
   stepTimeoutSeconds?: Prisma.IntFilter<"FotaJob"> | number
   stepDeadlineAt?: Prisma.DateTimeFilter<"FotaJob"> | Date | string
+  workerId?: Prisma.StringNullableFilter<"FotaJob"> | string | null
+  claimedAt?: Prisma.DateTimeNullableFilter<"FotaJob"> | Date | string | null
+  lastHeartbeatAt?: Prisma.DateTimeNullableFilter<"FotaJob"> | Date | string | null
   startedById?: Prisma.BigIntFilter<"FotaJob"> | bigint | number
   createdAt?: Prisma.DateTimeFilter<"FotaJob"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FotaJob"> | Date | string
@@ -395,6 +425,9 @@ export type FotaJobOrderByWithAggregationInput = {
   failureReason?: Prisma.SortOrderInput | Prisma.SortOrder
   stepTimeoutSeconds?: Prisma.SortOrder
   stepDeadlineAt?: Prisma.SortOrder
+  workerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  claimedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastHeartbeatAt?: Prisma.SortOrderInput | Prisma.SortOrder
   startedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -423,6 +456,9 @@ export type FotaJobScalarWhereWithAggregatesInput = {
   failureReason?: Prisma.StringNullableWithAggregatesFilter<"FotaJob"> | string | null
   stepTimeoutSeconds?: Prisma.IntWithAggregatesFilter<"FotaJob"> | number
   stepDeadlineAt?: Prisma.DateTimeWithAggregatesFilter<"FotaJob"> | Date | string
+  workerId?: Prisma.StringNullableWithAggregatesFilter<"FotaJob"> | string | null
+  claimedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"FotaJob"> | Date | string | null
+  lastHeartbeatAt?: Prisma.DateTimeNullableWithAggregatesFilter<"FotaJob"> | Date | string | null
   startedById?: Prisma.BigIntWithAggregatesFilter<"FotaJob"> | bigint | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"FotaJob"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"FotaJob"> | Date | string
@@ -441,6 +477,9 @@ export type FotaJobCreateInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   plant: Prisma.PlantCreateNestedOneWithoutFotaJobsInput
@@ -465,6 +504,9 @@ export type FotaJobUncheckedCreateInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   startedById: bigint | number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -485,6 +527,9 @@ export type FotaJobUpdateInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plant?: Prisma.PlantUpdateOneRequiredWithoutFotaJobsNestedInput
@@ -509,6 +554,9 @@ export type FotaJobUncheckedUpdateInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedById?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -531,6 +579,9 @@ export type FotaJobCreateManyInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   startedById: bigint | number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -549,6 +600,9 @@ export type FotaJobUpdateManyMutationInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -568,6 +622,9 @@ export type FotaJobUncheckedUpdateManyInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedById?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -603,6 +660,9 @@ export type FotaJobCountOrderByAggregateInput = {
   failureReason?: Prisma.SortOrder
   stepTimeoutSeconds?: Prisma.SortOrder
   stepDeadlineAt?: Prisma.SortOrder
+  workerId?: Prisma.SortOrder
+  claimedAt?: Prisma.SortOrder
+  lastHeartbeatAt?: Prisma.SortOrder
   startedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -629,6 +689,9 @@ export type FotaJobMaxOrderByAggregateInput = {
   failureReason?: Prisma.SortOrder
   stepTimeoutSeconds?: Prisma.SortOrder
   stepDeadlineAt?: Prisma.SortOrder
+  workerId?: Prisma.SortOrder
+  claimedAt?: Prisma.SortOrder
+  lastHeartbeatAt?: Prisma.SortOrder
   startedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -649,6 +712,9 @@ export type FotaJobMinOrderByAggregateInput = {
   failureReason?: Prisma.SortOrder
   stepTimeoutSeconds?: Prisma.SortOrder
   stepDeadlineAt?: Prisma.SortOrder
+  workerId?: Prisma.SortOrder
+  claimedAt?: Prisma.SortOrder
+  lastHeartbeatAt?: Prisma.SortOrder
   startedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -839,6 +905,9 @@ export type FotaJobCreateWithoutStartedByInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   plant: Prisma.PlantCreateNestedOneWithoutFotaJobsInput
@@ -862,6 +931,9 @@ export type FotaJobUncheckedCreateWithoutStartedByInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   taskJobs?: Prisma.TaskJobUncheckedCreateNestedManyWithoutJobInput
@@ -912,6 +984,9 @@ export type FotaJobScalarWhereInput = {
   failureReason?: Prisma.StringNullableFilter<"FotaJob"> | string | null
   stepTimeoutSeconds?: Prisma.IntFilter<"FotaJob"> | number
   stepDeadlineAt?: Prisma.DateTimeFilter<"FotaJob"> | Date | string
+  workerId?: Prisma.StringNullableFilter<"FotaJob"> | string | null
+  claimedAt?: Prisma.DateTimeNullableFilter<"FotaJob"> | Date | string | null
+  lastHeartbeatAt?: Prisma.DateTimeNullableFilter<"FotaJob"> | Date | string | null
   startedById?: Prisma.BigIntFilter<"FotaJob"> | bigint | number
   createdAt?: Prisma.DateTimeFilter<"FotaJob"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FotaJob"> | Date | string
@@ -930,6 +1005,9 @@ export type FotaJobCreateWithoutPlantInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   firmware?: Prisma.FirmwareCreateNestedOneWithoutFotaJobsInput
@@ -952,6 +1030,9 @@ export type FotaJobUncheckedCreateWithoutPlantInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   startedById: bigint | number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -998,6 +1079,9 @@ export type FotaJobCreateWithoutFirmwareInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   plant: Prisma.PlantCreateNestedOneWithoutFotaJobsInput
@@ -1020,6 +1104,9 @@ export type FotaJobUncheckedCreateWithoutFirmwareInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   startedById: bigint | number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1066,6 +1153,9 @@ export type FotaJobCreateWithoutTaskJobsInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   plant: Prisma.PlantCreateNestedOneWithoutFotaJobsInput
@@ -1089,6 +1179,9 @@ export type FotaJobUncheckedCreateWithoutTaskJobsInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   startedById: bigint | number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1124,6 +1217,9 @@ export type FotaJobUpdateWithoutTaskJobsInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plant?: Prisma.PlantUpdateOneRequiredWithoutFotaJobsNestedInput
@@ -1147,6 +1243,9 @@ export type FotaJobUncheckedUpdateWithoutTaskJobsInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedById?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1166,6 +1265,9 @@ export type FotaJobCreateWithoutCommandLogsInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   plant: Prisma.PlantCreateNestedOneWithoutFotaJobsInput
@@ -1189,6 +1291,9 @@ export type FotaJobUncheckedCreateWithoutCommandLogsInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   startedById: bigint | number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1224,6 +1329,9 @@ export type FotaJobUpdateWithoutCommandLogsInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plant?: Prisma.PlantUpdateOneRequiredWithoutFotaJobsNestedInput
@@ -1247,6 +1355,9 @@ export type FotaJobUncheckedUpdateWithoutCommandLogsInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedById?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1268,6 +1379,9 @@ export type FotaJobCreateManyStartedByInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1285,6 +1399,9 @@ export type FotaJobUpdateWithoutStartedByInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plant?: Prisma.PlantUpdateOneRequiredWithoutFotaJobsNestedInput
@@ -1308,6 +1425,9 @@ export type FotaJobUncheckedUpdateWithoutStartedByInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   taskJobs?: Prisma.TaskJobUncheckedUpdateManyWithoutJobNestedInput
@@ -1329,6 +1449,9 @@ export type FotaJobUncheckedUpdateManyWithoutStartedByInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1347,6 +1470,9 @@ export type FotaJobCreateManyPlantInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   startedById: bigint | number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1365,6 +1491,9 @@ export type FotaJobUpdateWithoutPlantInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   firmware?: Prisma.FirmwareUpdateOneWithoutFotaJobsNestedInput
@@ -1387,6 +1516,9 @@ export type FotaJobUncheckedUpdateWithoutPlantInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedById?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1408,6 +1540,9 @@ export type FotaJobUncheckedUpdateManyWithoutPlantInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedById?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1427,6 +1562,9 @@ export type FotaJobCreateManyFirmwareInput = {
   failureReason?: string | null
   stepTimeoutSeconds?: number
   stepDeadlineAt: Date | string
+  workerId?: string | null
+  claimedAt?: Date | string | null
+  lastHeartbeatAt?: Date | string | null
   startedById: bigint | number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1445,6 +1583,9 @@ export type FotaJobUpdateWithoutFirmwareInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plant?: Prisma.PlantUpdateOneRequiredWithoutFotaJobsNestedInput
@@ -1467,6 +1608,9 @@ export type FotaJobUncheckedUpdateWithoutFirmwareInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedById?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1488,6 +1632,9 @@ export type FotaJobUncheckedUpdateManyWithoutFirmwareInput = {
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stepTimeoutSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   stepDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastHeartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startedById?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1548,6 +1695,9 @@ export type FotaJobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   failureReason?: boolean
   stepTimeoutSeconds?: boolean
   stepDeadlineAt?: boolean
+  workerId?: boolean
+  claimedAt?: boolean
+  lastHeartbeatAt?: boolean
   startedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1574,6 +1724,9 @@ export type FotaJobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   failureReason?: boolean
   stepTimeoutSeconds?: boolean
   stepDeadlineAt?: boolean
+  workerId?: boolean
+  claimedAt?: boolean
+  lastHeartbeatAt?: boolean
   startedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1597,6 +1750,9 @@ export type FotaJobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   failureReason?: boolean
   stepTimeoutSeconds?: boolean
   stepDeadlineAt?: boolean
+  workerId?: boolean
+  claimedAt?: boolean
+  lastHeartbeatAt?: boolean
   startedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1620,12 +1776,15 @@ export type FotaJobSelectScalar = {
   failureReason?: boolean
   stepTimeoutSeconds?: boolean
   stepDeadlineAt?: boolean
+  workerId?: boolean
+  claimedAt?: boolean
+  lastHeartbeatAt?: boolean
   startedById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type FotaJobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"jobId" | "plantId" | "loggerImei" | "inverterSerialNo" | "currentFirmware" | "newFirmwareVersion" | "firmwareId" | "chipType" | "updateType" | "firmwareUrl" | "status" | "failureReason" | "stepTimeoutSeconds" | "stepDeadlineAt" | "startedById" | "createdAt" | "updatedAt", ExtArgs["result"]["fotaJob"]>
+export type FotaJobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"jobId" | "plantId" | "loggerImei" | "inverterSerialNo" | "currentFirmware" | "newFirmwareVersion" | "firmwareId" | "chipType" | "updateType" | "firmwareUrl" | "status" | "failureReason" | "stepTimeoutSeconds" | "stepDeadlineAt" | "workerId" | "claimedAt" | "lastHeartbeatAt" | "startedById" | "createdAt" | "updatedAt", ExtArgs["result"]["fotaJob"]>
 export type FotaJobInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plant?: boolean | Prisma.PlantDefaultArgs<ExtArgs>
   firmware?: boolean | Prisma.FotaJob$firmwareArgs<ExtArgs>
@@ -1669,6 +1828,9 @@ export type $FotaJobPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     failureReason: string | null
     stepTimeoutSeconds: number
     stepDeadlineAt: Date
+    workerId: string | null
+    claimedAt: Date | null
+    lastHeartbeatAt: Date | null
     startedById: bigint
     createdAt: Date
     updatedAt: Date
@@ -2114,6 +2276,9 @@ export interface FotaJobFieldRefs {
   readonly failureReason: Prisma.FieldRef<"FotaJob", 'String'>
   readonly stepTimeoutSeconds: Prisma.FieldRef<"FotaJob", 'Int'>
   readonly stepDeadlineAt: Prisma.FieldRef<"FotaJob", 'DateTime'>
+  readonly workerId: Prisma.FieldRef<"FotaJob", 'String'>
+  readonly claimedAt: Prisma.FieldRef<"FotaJob", 'DateTime'>
+  readonly lastHeartbeatAt: Prisma.FieldRef<"FotaJob", 'DateTime'>
   readonly startedById: Prisma.FieldRef<"FotaJob", 'BigInt'>
   readonly createdAt: Prisma.FieldRef<"FotaJob", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"FotaJob", 'DateTime'>
