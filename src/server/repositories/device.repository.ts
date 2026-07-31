@@ -157,7 +157,7 @@ type DeviceRow = {
 };
 
 export class DeviceRepository {
-  constructor(private readonly dbClient: PrismaClient = prisma) { }
+  constructor(private readonly dbClient: PrismaClient = prisma) {}
 
   private formatDateTime(value: Date | null | undefined): string {
     const date = value ?? new Date();
@@ -457,6 +457,8 @@ export class DeviceRepository {
 
       return {
         ...inverter,
+        updatedAt:
+          latest?.latestTimestamp ?? inverter.updateTime ?? inverter.updatedAt,
         powerValue: latest?.currentPower ?? 0,
         eTodayValue: latest?.dailyProduction ?? 0,
 
@@ -706,8 +708,8 @@ export class DeviceRepository {
       let connectionStatus = null;
 
       if (latestLog?.macAddress) {
-        connectionStatus =
-          await this.dbClient.deviceConnectionStatus.findFirst({
+        connectionStatus = await this.dbClient.deviceConnectionStatus.findFirst(
+          {
             where: {
               macAddress: latestLog.macAddress,
             },
@@ -715,7 +717,8 @@ export class DeviceRepository {
               status: true,
               lastSeenTime: true,
             },
-          });
+          },
+        );
       }
       return {
         id: `device-${String(inverter.id)}`,
@@ -772,16 +775,15 @@ export class DeviceRepository {
     let connectionStatus = null;
 
     if (latestLog?.macAddress) {
-      connectionStatus =
-        await this.dbClient.deviceConnectionStatus.findFirst({
-          where: {
-            macAddress: latestLog.macAddress,
-          },
-          select: {
-            status: true,
-            lastSeenTime: true,
-          },
-        });
+      connectionStatus = await this.dbClient.deviceConnectionStatus.findFirst({
+        where: {
+          macAddress: latestLog.macAddress,
+        },
+        select: {
+          status: true,
+          lastSeenTime: true,
+        },
+      });
     }
 
     return {
@@ -1160,7 +1162,6 @@ export class DeviceRepository {
   async getDeviceLogsSnapshot(
     params: DeviceLogsSnapshotParams,
   ): Promise<DeviceLogsSnapshot> {
-
     const plantId = this.parsePlantId(params.plantId);
     const deviceId = this.parseDeviceId(params.deviceId);
 
@@ -1277,13 +1278,13 @@ export class DeviceRepository {
       plantAccount: plant.userAccount,
       device: {
         id: datalogger.id,
-        name: datalogger.name ?? `${datalogger.type} ${datalogger.serialNumber}`,
+        name:
+          datalogger.name ?? `${datalogger.type} ${datalogger.serialNumber}`,
         type: datalogger.type,
         sn: datalogger.serialNumber,
       },
       alerts,
     };
-
   }
 
   async getDeviceCurrentAlertsSnapshot(
@@ -1325,8 +1326,6 @@ export class DeviceRepository {
       },
     });
 
-
-
     if (inverter) {
       const alerts = await this.dbClient.alertEvent.findMany({
         where: {
@@ -1343,7 +1342,7 @@ export class DeviceRepository {
           status: true,
           raisedAt: true,
           createdAt: true,
-        }
+        },
       });
       return {
         plantId: plant.id,
@@ -1396,7 +1395,7 @@ export class DeviceRepository {
         status: true,
         raisedAt: true,
         createdAt: true,
-      }
+      },
     });
 
     return {
@@ -1404,7 +1403,8 @@ export class DeviceRepository {
       plantAccount: plant.userAccount,
       device: {
         id: datalogger.id,
-        name: datalogger.name ?? `${datalogger.type} ${datalogger.serialNumber}`,
+        name:
+          datalogger.name ?? `${datalogger.type} ${datalogger.serialNumber}`,
         type: datalogger.type,
         sn: datalogger.serialNumber,
         updatedAt: datalogger.updateTime ?? datalogger.updatedAt,
@@ -1512,20 +1512,20 @@ export class DeviceRepository {
     if (inverter) {
       const latestLog = inverter.serialNumber
         ? await this.dbClient.deviceLogsLatest.findFirst({
-          where: {
-            sno: inverter.serialNumber,
-          },
-          orderBy: {
-            latestTimestamp: "desc",
-          },
-          select: {
-            currentPower: true,
-            dailyProduction: true,
-            totalEnergy: true,
-            totalHours: true,
-            latestTimestamp: true,
-          },
-        })
+            where: {
+              sno: inverter.serialNumber,
+            },
+            orderBy: {
+              latestTimestamp: "desc",
+            },
+            select: {
+              currentPower: true,
+              dailyProduction: true,
+              totalEnergy: true,
+              totalHours: true,
+              latestTimestamp: true,
+            },
+          })
         : null;
 
       return {
@@ -1763,7 +1763,10 @@ export class DeviceRepository {
     items: { id: string; name: string; serialNumber: string; status: string }[];
     totalItems: number;
   }> {
-    if (params.scope !== "all" && (!params.scope || params.scope.length === 0)) {
+    if (
+      params.scope !== "all" &&
+      (!params.scope || params.scope.length === 0)
+    ) {
       return { items: [], totalItems: 0 };
     }
 
@@ -1774,11 +1777,18 @@ export class DeviceRepository {
         : { plant: { userAccount: { in: params.scope }, deletedAt: null } }),
       ...(params.search
         ? {
-          OR: [
-            { name: { contains: params.search, mode: "insensitive" as const } },
-            { serialNumber: { contains: params.search, mode: "insensitive" as const } },
-          ],
-        }
+            OR: [
+              {
+                name: { contains: params.search, mode: "insensitive" as const },
+              },
+              {
+                serialNumber: {
+                  contains: params.search,
+                  mode: "insensitive" as const,
+                },
+              },
+            ],
+          }
         : {}),
     };
 
@@ -1795,12 +1805,15 @@ export class DeviceRepository {
 
     const serialNumbers = inverters.map((inverter) => inverter.serialNumber);
 
-    const connectionStatuses = await this.dbClient.deviceConnectionStatus.findMany({
-      where: { serialNumber: { in: serialNumbers } },
-      select: { serialNumber: true, status: true },
-    });
+    const connectionStatuses =
+      await this.dbClient.deviceConnectionStatus.findMany({
+        where: { serialNumber: { in: serialNumbers } },
+        select: { serialNumber: true, status: true },
+      });
 
-    const statusMap = new Map(connectionStatuses.map((item) => [item.serialNumber, item.status]));
+    const statusMap = new Map(
+      connectionStatuses.map((item) => [item.serialNumber, item.status]),
+    );
 
     return {
       items: inverters.map((inverter) => ({
