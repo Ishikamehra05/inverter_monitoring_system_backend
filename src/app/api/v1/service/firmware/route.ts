@@ -69,10 +69,10 @@ type CountRow = {
 // }
 
 function formatDateTime(value: Date | string): string {
-  const str =
-    value instanceof Date ? value.toISOString() : String(value);
+	const str =
+		value instanceof Date ? value.toISOString() : String(value);
 
-  return str.replace("T", " ").replace(/\.\d+Z?$/, "").replace("Z", "");
+	return str.replace("T", " ").replace(/\.\d+Z?$/, "").replace("Z", "");
 }
 
 function mapFirmware(row: FirmwareRow) {
@@ -175,12 +175,16 @@ async function postFirmware(request: NextRequest): Promise<Response> {
 	}
 
 	const firmwareId = randomUUID();
+	// const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+	// const storageDir = path.join(process.cwd(), 'uploads', 'firmware');
+	// const storageName = `${firmwareId}-${safeFileName}`;
+	// const filePath = path.join(storageDir, storageName);
+	// const relativePath = path.join('uploads', 'firmware', storageName);
+	const bytes = Buffer.from(await file.arrayBuffer());
 	const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
 	const storageDir = path.join(process.cwd(), 'uploads', 'firmware');
-	const storageName = `${firmwareId}-${safeFileName}`;
-	const filePath = path.join(storageDir, storageName);
-	const relativePath = path.join('uploads', 'firmware', storageName);
-	const bytes = Buffer.from(await file.arrayBuffer());
+	const filePath = path.join(storageDir, safeFileName);
+	const relativePath = safeFileName;
 
 	await mkdir(storageDir, { recursive: true });
 	await writeFile(filePath, bytes);

@@ -207,7 +207,7 @@ async function postUpgradeTask(request: NextRequest): Promise<Response> {
 
 	// const firmwareUrl =
 	// 	`${request.nextUrl.origin}/api/v1/service/firmware/${firmwareResolution.firmwareId}`;
-	const firmwareUrl = `http://fota.solarlogger.in?file=${firmwareResolution.firmwareUrl}`;
+	const firmwareUrl = `http://fota.solarlogger.in/firware${firmwareResolution.firmwareUrl}`;
 
 	let placeholderPlantId: bigint | null = null;
 	if (data.devices.some((device) => device.plantId === undefined)) {
