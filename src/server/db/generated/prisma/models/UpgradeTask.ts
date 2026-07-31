@@ -40,6 +40,7 @@ export type UpgradeTaskMinAggregateOutputType = {
   createdById: bigint | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
 }
 
 export type UpgradeTaskMaxAggregateOutputType = {
@@ -48,6 +49,7 @@ export type UpgradeTaskMaxAggregateOutputType = {
   createdById: bigint | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
 }
 
 export type UpgradeTaskCountAggregateOutputType = {
@@ -56,6 +58,7 @@ export type UpgradeTaskCountAggregateOutputType = {
   createdById: number
   createdAt: number
   updatedAt: number
+  deletedAt: number
   _all: number
 }
 
@@ -74,6 +77,7 @@ export type UpgradeTaskMinAggregateInputType = {
   createdById?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
 }
 
 export type UpgradeTaskMaxAggregateInputType = {
@@ -82,6 +86,7 @@ export type UpgradeTaskMaxAggregateInputType = {
   createdById?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
 }
 
 export type UpgradeTaskCountAggregateInputType = {
@@ -90,6 +95,7 @@ export type UpgradeTaskCountAggregateInputType = {
   createdById?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -185,6 +191,7 @@ export type UpgradeTaskGroupByOutputType = {
   createdById: bigint | null
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
   _count: UpgradeTaskCountAggregateOutputType | null
   _avg: UpgradeTaskAvgAggregateOutputType | null
   _sum: UpgradeTaskSumAggregateOutputType | null
@@ -216,6 +223,7 @@ export type UpgradeTaskWhereInput = {
   createdById?: Prisma.BigIntNullableFilter<"UpgradeTask"> | bigint | number | null
   createdAt?: Prisma.DateTimeFilter<"UpgradeTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UpgradeTask"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"UpgradeTask"> | Date | string | null
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   taskJobs?: Prisma.TaskJobListRelationFilter
 }
@@ -226,6 +234,7 @@ export type UpgradeTaskOrderByWithRelationInput = {
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdBy?: Prisma.UserOrderByWithRelationInput
   taskJobs?: Prisma.TaskJobOrderByRelationAggregateInput
 }
@@ -239,6 +248,7 @@ export type UpgradeTaskWhereUniqueInput = Prisma.AtLeast<{
   createdById?: Prisma.BigIntNullableFilter<"UpgradeTask"> | bigint | number | null
   createdAt?: Prisma.DateTimeFilter<"UpgradeTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UpgradeTask"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"UpgradeTask"> | Date | string | null
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   taskJobs?: Prisma.TaskJobListRelationFilter
 }, "id">
@@ -249,6 +259,7 @@ export type UpgradeTaskOrderByWithAggregationInput = {
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UpgradeTaskCountOrderByAggregateInput
   _avg?: Prisma.UpgradeTaskAvgOrderByAggregateInput
   _max?: Prisma.UpgradeTaskMaxOrderByAggregateInput
@@ -265,6 +276,7 @@ export type UpgradeTaskScalarWhereWithAggregatesInput = {
   createdById?: Prisma.BigIntNullableWithAggregatesFilter<"UpgradeTask"> | bigint | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UpgradeTask"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"UpgradeTask"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"UpgradeTask"> | Date | string | null
 }
 
 export type UpgradeTaskCreateInput = {
@@ -272,6 +284,7 @@ export type UpgradeTaskCreateInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   createdBy?: Prisma.UserCreateNestedOneWithoutUpgradeTasksInput
   taskJobs?: Prisma.TaskJobCreateNestedManyWithoutTaskInput
 }
@@ -282,6 +295,7 @@ export type UpgradeTaskUncheckedCreateInput = {
   createdById?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   taskJobs?: Prisma.TaskJobUncheckedCreateNestedManyWithoutTaskInput
 }
 
@@ -290,6 +304,7 @@ export type UpgradeTaskUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.UserUpdateOneWithoutUpgradeTasksNestedInput
   taskJobs?: Prisma.TaskJobUpdateManyWithoutTaskNestedInput
 }
@@ -300,6 +315,7 @@ export type UpgradeTaskUncheckedUpdateInput = {
   createdById?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   taskJobs?: Prisma.TaskJobUncheckedUpdateManyWithoutTaskNestedInput
 }
 
@@ -309,6 +325,7 @@ export type UpgradeTaskCreateManyInput = {
   createdById?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type UpgradeTaskUpdateManyMutationInput = {
@@ -316,6 +333,7 @@ export type UpgradeTaskUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UpgradeTaskUncheckedUpdateManyInput = {
@@ -324,6 +342,7 @@ export type UpgradeTaskUncheckedUpdateManyInput = {
   createdById?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UpgradeTaskListRelationFilter = {
@@ -342,6 +361,7 @@ export type UpgradeTaskCountOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type UpgradeTaskAvgOrderByAggregateInput = {
@@ -354,6 +374,7 @@ export type UpgradeTaskMaxOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type UpgradeTaskMinOrderByAggregateInput = {
@@ -362,6 +383,7 @@ export type UpgradeTaskMinOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type UpgradeTaskSumOrderByAggregateInput = {
@@ -434,6 +456,7 @@ export type UpgradeTaskCreateWithoutCreatedByInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   taskJobs?: Prisma.TaskJobCreateNestedManyWithoutTaskInput
 }
 
@@ -442,6 +465,7 @@ export type UpgradeTaskUncheckedCreateWithoutCreatedByInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   taskJobs?: Prisma.TaskJobUncheckedCreateNestedManyWithoutTaskInput
 }
 
@@ -480,6 +504,7 @@ export type UpgradeTaskScalarWhereInput = {
   createdById?: Prisma.BigIntNullableFilter<"UpgradeTask"> | bigint | number | null
   createdAt?: Prisma.DateTimeFilter<"UpgradeTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UpgradeTask"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"UpgradeTask"> | Date | string | null
 }
 
 export type UpgradeTaskCreateWithoutTaskJobsInput = {
@@ -487,6 +512,7 @@ export type UpgradeTaskCreateWithoutTaskJobsInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   createdBy?: Prisma.UserCreateNestedOneWithoutUpgradeTasksInput
 }
 
@@ -496,6 +522,7 @@ export type UpgradeTaskUncheckedCreateWithoutTaskJobsInput = {
   createdById?: bigint | number | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type UpgradeTaskCreateOrConnectWithoutTaskJobsInput = {
@@ -519,6 +546,7 @@ export type UpgradeTaskUpdateWithoutTaskJobsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.UserUpdateOneWithoutUpgradeTasksNestedInput
 }
 
@@ -528,6 +556,7 @@ export type UpgradeTaskUncheckedUpdateWithoutTaskJobsInput = {
   createdById?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UpgradeTaskCreateManyCreatedByInput = {
@@ -535,6 +564,7 @@ export type UpgradeTaskCreateManyCreatedByInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type UpgradeTaskUpdateWithoutCreatedByInput = {
@@ -542,6 +572,7 @@ export type UpgradeTaskUpdateWithoutCreatedByInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   taskJobs?: Prisma.TaskJobUpdateManyWithoutTaskNestedInput
 }
 
@@ -550,6 +581,7 @@ export type UpgradeTaskUncheckedUpdateWithoutCreatedByInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   taskJobs?: Prisma.TaskJobUncheckedUpdateManyWithoutTaskNestedInput
 }
 
@@ -558,6 +590,7 @@ export type UpgradeTaskUncheckedUpdateManyWithoutCreatedByInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -597,6 +630,7 @@ export type UpgradeTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   createdBy?: boolean | Prisma.UpgradeTask$createdByArgs<ExtArgs>
   taskJobs?: boolean | Prisma.UpgradeTask$taskJobsArgs<ExtArgs>
   _count?: boolean | Prisma.UpgradeTaskCountOutputTypeDefaultArgs<ExtArgs>
@@ -608,6 +642,7 @@ export type UpgradeTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   createdBy?: boolean | Prisma.UpgradeTask$createdByArgs<ExtArgs>
 }, ExtArgs["result"]["upgradeTask"]>
 
@@ -617,6 +652,7 @@ export type UpgradeTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   createdBy?: boolean | Prisma.UpgradeTask$createdByArgs<ExtArgs>
 }, ExtArgs["result"]["upgradeTask"]>
 
@@ -626,9 +662,10 @@ export type UpgradeTaskSelectScalar = {
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
 }
 
-export type UpgradeTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["upgradeTask"]>
+export type UpgradeTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "createdById" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["upgradeTask"]>
 export type UpgradeTaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdBy?: boolean | Prisma.UpgradeTask$createdByArgs<ExtArgs>
   taskJobs?: boolean | Prisma.UpgradeTask$taskJobsArgs<ExtArgs>
@@ -653,6 +690,7 @@ export type $UpgradeTaskPayload<ExtArgs extends runtime.Types.Extensions.Interna
     createdById: bigint | null
     createdAt: Date
     updatedAt: Date
+    deletedAt: Date | null
   }, ExtArgs["result"]["upgradeTask"]>
   composites: {}
 }
@@ -1083,6 +1121,7 @@ export interface UpgradeTaskFieldRefs {
   readonly createdById: Prisma.FieldRef<"UpgradeTask", 'BigInt'>
   readonly createdAt: Prisma.FieldRef<"UpgradeTask", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"UpgradeTask", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"UpgradeTask", 'DateTime'>
 }
     
 
