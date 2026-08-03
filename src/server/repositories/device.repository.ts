@@ -157,7 +157,7 @@ type DeviceRow = {
 };
 
 export class DeviceRepository {
-  constructor(private readonly dbClient: PrismaClient = prisma) {}
+  constructor(private readonly dbClient: PrismaClient = prisma) { }
 
   private formatDateTime(value: Date | null | undefined): string {
     const date = value ?? new Date();
@@ -175,6 +175,12 @@ export class DeviceRepository {
       .format(date)
       .replace(",", "");
   }
+
+  private formatUtcDateTime(value: Date | null | undefined): string {
+  if (!value) return "-";
+
+  return value.toISOString().replace("T", " ").replace("Z", "").substring(0, 19);
+}
 
   private parseDeviceId(deviceId: string): bigint {
     const normalized = deviceId.startsWith("device-")
@@ -236,7 +242,7 @@ export class DeviceRepository {
           ? true
           : Boolean(device.online),
       status: device.status ?? "offline",
-      updatedAt: this.formatDateTime(
+      updatedAt: this.formatUtcDateTime(
         device.updatedAt ?? device.updateTime ?? device.createdAt,
       ),
     }));
@@ -454,6 +460,11 @@ export class DeviceRepository {
 
     const enrichedInverters = inverters.map((inverter) => {
       const latest = latestMap.get(inverter.serialNumber);
+      console.log(
+        inverter.serialNumber,
+        latest?.latestTimestamp,
+        latest?.latestTimestamp?.toISOString()
+      );
 
       return {
         ...inverter,
@@ -1512,20 +1523,20 @@ export class DeviceRepository {
     if (inverter) {
       const latestLog = inverter.serialNumber
         ? await this.dbClient.deviceLogsLatest.findFirst({
-            where: {
-              sno: inverter.serialNumber,
-            },
-            orderBy: {
-              latestTimestamp: "desc",
-            },
-            select: {
-              currentPower: true,
-              dailyProduction: true,
-              totalEnergy: true,
-              totalHours: true,
-              latestTimestamp: true,
-            },
-          })
+          where: {
+            sno: inverter.serialNumber,
+          },
+          orderBy: {
+            latestTimestamp: "desc",
+          },
+          select: {
+            currentPower: true,
+            dailyProduction: true,
+            totalEnergy: true,
+            totalHours: true,
+            latestTimestamp: true,
+          },
+        })
         : null;
 
       return {
@@ -1777,18 +1788,18 @@ export class DeviceRepository {
         : { plant: { userAccount: { in: params.scope }, deletedAt: null } }),
       ...(params.search
         ? {
-            OR: [
-              {
-                name: { contains: params.search, mode: "insensitive" as const },
+          OR: [
+            {
+              name: { contains: params.search, mode: "insensitive" as const },
+            },
+            {
+              serialNumber: {
+                contains: params.search,
+                mode: "insensitive" as const,
               },
-              {
-                serialNumber: {
-                  contains: params.search,
-                  mode: "insensitive" as const,
-                },
-              },
-            ],
-          }
+            },
+          ],
+        }
         : {}),
     };
 

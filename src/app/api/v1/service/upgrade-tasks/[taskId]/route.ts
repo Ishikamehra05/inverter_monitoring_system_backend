@@ -55,13 +55,14 @@ async function getUpgradeTaskDetail(
   let taskRows: TaskRow[];
   try {
     taskRows = await prisma.$queryRaw<TaskRow[]>`
-			SELECT id::text, name, created_at, updated_at
-			FROM upgrade_task
-			WHERE id = ${taskId}::uuid
-			    AND deleted_at IS NULL
-			LIMIT 1
-		`;
-  } catch {
+  SELECT id::text, name, created_at, updated_at
+  FROM upgrade_task
+  WHERE id = ${taskId}::uuid
+    AND "deletedAt" IS NULL
+  LIMIT 1
+`;
+  } catch (err) {
+    console.error(err);
     return errorResponse("Invalid task id", 400);
   }
 
