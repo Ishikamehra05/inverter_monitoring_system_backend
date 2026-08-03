@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import { prisma } from "@/server/db/prisma";
-import { Prisma } from "@/server/db/generated/prisma/client";
+import { FotaJobStatus, Prisma } from "@/server/db/generated/prisma/client";
 import { requireAuth } from "@/server/middleware/auth.middleware";
 import { withRequestLogging } from "@/server/middleware/request-log.middleware";
 import { errorResponse, successResponse } from "@/server/utils/api-response";
@@ -155,21 +155,42 @@ async function deleteUpgradeTask(
     return errorResponse("Task id is required", 400);
   }
 
-  let updated: number;
-
   try {
-    updated = await prisma.$executeRaw`
-      UPDATE upgrade_task
-      SET "deletedAt" = NOW()
-      WHERE id = ${taskId}::uuid
-        AND "deletedAt" IS NULL
-    `;
-  } catch {
-    return errorResponse("Invalid task id", 400);
-  }
+    await prisma.$transaction(async (tx) => {
+      // Soft delete the task
+      const updated = await tx.$executeRaw`
+        UPDATE upgrade_task
+        SET "deletedAt" = NOW()
+        WHERE id = ${taskId}::uuid
+          AND "deletedAt" IS NULL
+      `;
 
-  if (updated === 0) {
-    return errorResponse("Upgrade task not found", 404);
+      if (updated === 0) {
+        throw new Error("NOT_FOUND");
+      }
+
+      // Mark all active jobs linked to this task as FAILED
+      const result = await tx.fotaJob.updateMany({
+        where: {
+          taskJobs: {
+            some: {
+              taskId,
+            },
+          },
+          status: FotaJobStatus.PENDING,
+        },
+        data: {
+          status: FotaJobStatus.FAILED,
+          failureReason: "Upgrade task deleted by user",
+        },
+      });
+      console.log("Updated rows:", result);
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "NOT_FOUND") {
+      return errorResponse("Upgrade task not found", 404);
+    }
+    return errorResponse("Invalid task id", 400);
   }
 
   return successResponse("Upgrade task deleted", null);
