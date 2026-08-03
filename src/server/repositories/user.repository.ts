@@ -76,7 +76,20 @@ export interface DataloggerLatestRecord {
 }
 export class UserRepository {
   constructor(private readonly dbClient: PrismaClient = prisma) {}
+  async getManagedAccounts(serviceAdminId: bigint): Promise<string[]> {
+    const users = await this.dbClient.user.findMany({
+      where: {
+        assignedById: serviceAdminId,
+        portal: "monitoring",
+        isDeleted: false,
+      },
+      select: {
+        account: true,
+      },
+    });
 
+    return users.map((u) => u.account);
+  }
   private buildWhere(roleType: UserRoleType, filters: UserListQueryInput) {
     const where: Record<string, unknown> = {};
 
@@ -178,6 +191,7 @@ export class UserRepository {
       deletedAt: record.deletedAt,
     };
   }
+
   async findMonitoringUserByAccount(
     account: string,
   ): Promise<UserDetailRecord | null> {
@@ -415,6 +429,7 @@ export class UserRepository {
 
     return user ? [user.account] : null;
   }
+
   async findByPortalAndAccount(
     portal: string,
     account: string,
