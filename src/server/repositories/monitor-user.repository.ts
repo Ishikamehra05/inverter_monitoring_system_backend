@@ -256,7 +256,6 @@ export class MonitorUserRepository {
     });
   }
 
-<<<<<<< HEAD
 //   findAssignersByIds(assignerIds: bigint[]) {
 //     return this.dbClient.user.findMany({
 //       where: {
@@ -271,18 +270,13 @@ export class MonitorUserRepository {
 //     });
 //   }
 
-=======
->>>>>>> e6065e94f413162d0abbd35beff57430f22e9207
   findAssignersByIds(assignerIds: bigint[]) {
     return this.dbClient.user.findMany({
       where: {
         id: {
           in: assignerIds,
         },
-<<<<<<< HEAD
         isDeleted: false,
-=======
->>>>>>> e6065e94f413162d0abbd35beff57430f22e9207
       },
       select: {
         id: true,
