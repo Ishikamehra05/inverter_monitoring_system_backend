@@ -1,0 +1,30 @@
+Name,Account,Type,SN,Time,Status,Event
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:40:12,Inactive,Data logger lost
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:40:12,Inactive,AFCI module lost
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:40:12,Inactive,EMS/CSB EEPROM fail
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:39:56,Active,Battery 2 over temperature
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:39:56,Active,Battery 2 discharge over current
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:39:56,Active,Low battery 2
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:39:56,Active,Battery 2 over voltage
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:39:56,Active,Data logger lost
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:39:56,Active,AFCI module lost
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:39:56,Active,EMS/CSB EEPROM fail
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:34:00,Inactive,Data logger lost
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:34:00,Inactive,AFCI module lost
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:34:00,Inactive,EMS/CSB EEPROM fail
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:33:54,Active,Data logger lost
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:33:54,Active,AFCI module lost
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:33:54,Active,EMS/CSB EEPROM fail
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:20:38,Inactive,Battery 2 over temperature
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:20:38,Inactive,Low battery 2
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:20:17,Active,Battery 2 over temperature
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:20:17,Active,Low battery 2
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:20:17,Inactive,Grid under frequency
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:20:17,Inactive,Grid absent
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 13:20:17,Inactive,Grid under voltage
+plant a,ishika,PSIS3K6SM1R2,2522-37343746P,2026-07-13 11:45:01,Active,Grid under frequency
+plant a,ishika,PSIS3K6SM1R2,2522-37343746P,2026-07-13 11:45:01,Active,Grid absent
+plant a,ishika,PSIS3K6SM1R2,2522-37343746P,2026-07-13 11:45:01,Active,Grid under voltage
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 11:42:30,Active,Grid under frequency
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 11:42:30,Active,Grid absent
+plant a,ishika,PSIS3K6SM1R2,12345,2026-07-13 11:42:30,Active,Grid under voltage
