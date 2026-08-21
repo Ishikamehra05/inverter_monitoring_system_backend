@@ -368,6 +368,7 @@ export class DeviceRepository {
   // 		};
   // 	}
 
+<<<<<<< HEAD
 //   async getPlantDeviceList(params: DeviceListParams) {
 //     await this.getScopedPlantOrThrow(params.scope, params.plantId);
 
@@ -509,15 +510,21 @@ export class DeviceRepository {
 //     };
 //   }
 
+=======
+>>>>>>> e6065e94f413162d0abbd35beff57430f22e9207
   async getPlantDeviceList(params: DeviceListParams) {
     await this.getScopedPlantOrThrow(params.scope, params.plantId);
 
     const [inverters, dataloggers] = await Promise.all([
       this.dbClient.deviceInverter.findMany({
+<<<<<<< HEAD
         where: {
           plantId: BigInt(params.plantId),
           deletedAt: null,
         },
+=======
+        where: { plantId: BigInt(params.plantId), deletedAt: null },
+>>>>>>> e6065e94f413162d0abbd35beff57430f22e9207
         select: {
           id: true,
           name: true,
@@ -528,12 +535,17 @@ export class DeviceRepository {
           createdAt: true,
         },
       }),
+<<<<<<< HEAD
 
       this.dbClient.deviceDatalogger.findMany({
         where: {
           plantId: BigInt(params.plantId),
           deletedAt: null,
         },
+=======
+      this.dbClient.deviceDatalogger.findMany({
+        where: { plantId: BigInt(params.plantId), deletedAt: null },
+>>>>>>> e6065e94f413162d0abbd35beff57430f22e9207
         select: {
           id: true,
           name: true,
@@ -547,6 +559,7 @@ export class DeviceRepository {
       }),
     ]);
 
+<<<<<<< HEAD
     // Inverter serial numbers
     const serialNumbers = inverters
       .map((inverter) => inverter.serialNumber)
@@ -569,6 +582,24 @@ export class DeviceRepository {
       });
 
     // Build conditions to get the actual latest log
+=======
+    const serialNumbers = inverters.map((i) => i.serialNumber);
+
+    const latestPerInverter = await this.dbClient.deviceLogsLatest.groupBy({
+      by: ["sno"],
+
+      where: {
+        sno: {
+          in: serialNumbers,
+        },
+      },
+
+      _max: {
+        latestTimestamp: true,
+      },
+    });
+
+>>>>>>> e6065e94f413162d0abbd35beff57430f22e9207
     const latestConditions = latestPerInverter
       .filter((item) => item._max.latestTimestamp)
       .map((item) => ({
@@ -576,6 +607,7 @@ export class DeviceRepository {
         latestTimestamp: item._max.latestTimestamp!,
       }));
 
+<<<<<<< HEAD
     // Get latest logs including MAC address
     const latestLogs =
       latestConditions.length > 0
@@ -662,6 +694,67 @@ export class DeviceRepository {
     });
 
     // Map and sort all devices
+=======
+    const [latestLogs, connectionStatuses] = await Promise.all([
+      this.dbClient.deviceLogsLatest.findMany({
+        where: {
+          OR: latestConditions,
+        },
+
+        select: {
+          sno: true,
+          currentPower: true,
+          dailyProduction: true,
+          totalEnergy: true,
+          totalHours: true,
+          latestTimestamp: true,
+        },
+      }),
+
+      this.dbClient.deviceConnectionStatus.findMany({
+        where: {
+          serialNumber: {
+            in: serialNumbers,
+          },
+        },
+
+        select: {
+          serialNumber: true,
+          status: true,
+        },
+      }),
+    ]);
+
+    const latestMap = new Map(latestLogs.map((log) => [log.sno, log]));
+
+    const statusMap = new Map(
+      connectionStatuses.map((item) => [item.serialNumber, item.status]),
+    );
+
+    const enrichedInverters = inverters.map((inverter) => {
+      const latest = latestMap.get(inverter.serialNumber);
+      console.log(
+        inverter.serialNumber,
+        latest?.latestTimestamp,
+        latest?.latestTimestamp?.toISOString()
+      );
+
+      return {
+        ...inverter,
+        updatedAt:
+          latest?.latestTimestamp ?? inverter.updateTime ?? inverter.updatedAt,
+        powerValue: latest?.currentPower ?? 0,
+        eTodayValue: latest?.dailyProduction ?? 0,
+
+        eTotalValue: latest?.totalEnergy ?? 0,
+
+        hTotalValue: latest?.totalHours ?? 0,
+
+        status: statusMap.get(inverter.serialNumber) ?? "offline",
+      };
+    });
+
+>>>>>>> e6065e94f413162d0abbd35beff57430f22e9207
     const rows = this.sortRows(
       [
         ...this.mapDeviceRows(enrichedInverters),
@@ -672,6 +765,7 @@ export class DeviceRepository {
     );
 
     const totalItems = rows.length;
+<<<<<<< HEAD
 
     const totalPages =
       totalItems > 0
@@ -692,6 +786,17 @@ export class DeviceRepository {
         start + params.pageSize,
       ),
 
+=======
+    const totalPages =
+      totalItems > 0 ? Math.ceil(totalItems / params.pageSize) : 0;
+
+    const safePage = totalPages > 0 ? Math.min(params.page, totalPages) : 1;
+
+    const start = (safePage - 1) * params.pageSize;
+
+    return {
+      items: rows.slice(start, start + params.pageSize),
+>>>>>>> e6065e94f413162d0abbd35beff57430f22e9207
       pagination: {
         page: totalItems > 0 ? safePage : 1,
         pageSize: params.pageSize,
@@ -771,6 +876,7 @@ export class DeviceRepository {
   // 	return { deviceId: `device-${String(created.id)}` };
   // }
 
+<<<<<<< HEAD
 //   async addPlantInverter(params: AddPlantInverterParams) {
 //     await this.getScopedPlantOrThrow(params.scope, params.plantId);
 
@@ -894,6 +1000,62 @@ async addPlantInverter(params: AddPlantInverterParams) {
   };
 }
 
+=======
+  async addPlantInverter(params: AddPlantInverterParams) {
+    await this.getScopedPlantOrThrow(params.scope, params.plantId);
+
+    const user = await this.dbClient.user.findUnique({
+      where: {
+        account: params.scope[0], // or wherever username exists
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const latestDevice = await this.dbClient.deviceLogsLatest.findFirst({
+      where: {
+        sno: params.serialNumber,
+      },
+      select: {
+        inverterName: true,
+      },
+    });
+
+    const type = latestDevice?.inverterName ?? undefined;
+
+    const created = await this.dbClient.deviceInverter.create({
+      data: {
+        plantId: BigInt(params.plantId),
+        serialNumber: params.serialNumber,
+
+        type,
+
+        name: type ? `${type} ${params.serialNumber}` : params.serialNumber,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    // create mapping entry
+    await this.dbClient.userPlantInverterMap.create({
+      data: {
+        userId: BigInt(user.id),
+        plantId: BigInt(params.plantId),
+        serialNumber: params.serialNumber,
+        isDeleted: false,
+      },
+    });
+
+    return { deviceId: `device-${String(created.id)}` };
+  }
+
+>>>>>>> e6065e94f413162d0abbd35beff57430f22e9207
   // async getDeviceView(params: DeviceViewParams) {
   // 	await this.getScopedPlantOrThrow(params.scope, params.plantId);
   // 	const deviceId = this.parseDeviceId(params.deviceId);
@@ -1137,6 +1299,7 @@ async addPlantInverter(params: AddPlantInverterParams) {
   // 	return { id: `device-${String(deleted.id)}`, status: 'deleted', deletedAt: deleted.deletedAt?.toISOString() };
   // }
 
+<<<<<<< HEAD
 //   async deleteDevice(params: DeviceDeleteParams) {
 //     await this.getScopedPlantOrThrow(params.scope, params.plantId);
 //     console.log("params", params.scope);
@@ -1321,6 +1484,93 @@ async deleteDevice(params: DeviceDeleteParams) {
       });
 
       return updatedInverter;
+=======
+  async deleteDevice(params: DeviceDeleteParams) {
+    await this.getScopedPlantOrThrow(params.scope, params.plantId);
+    console.log("params", params.scope);
+
+    const deviceId = this.parseDeviceId(params.deviceId);
+
+    const inverter = await this.dbClient.deviceInverter.findFirst({
+      where: {
+        id: deviceId,
+        plantId: BigInt(params.plantId),
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        serialNumber: true,
+      },
+    });
+
+    if (inverter) {
+      const deletedSerial = `${inverter.serialNumber}_deleted`;
+
+      const deleted = await this.dbClient.$transaction(async (tx) => {
+        const updatedInverter = await tx.deviceInverter.update({
+          where: {
+            id: deviceId,
+          },
+          data: {
+            deletedAt: new Date(),
+            serialNumber: deletedSerial,
+          },
+          select: {
+            id: true,
+            deletedAt: true,
+          },
+        });
+
+        await tx.userPlantInverterMap.updateMany({
+          where: {
+            serialNumber: inverter.serialNumber,
+          },
+          data: {
+            isDeleted: true,
+            deletedAt: new Date(),
+            serialNumber: deletedSerial,
+          },
+        });
+
+        return updatedInverter;
+      });
+
+      return {
+        id: `device-${String(deleted.id)}`,
+        status: "deleted",
+        deletedAt: deleted.deletedAt?.toISOString(),
+      };
+    }
+
+    const datalogger = await this.dbClient.deviceDatalogger.findFirst({
+      where: {
+        id: deviceId,
+        plantId: BigInt(params.plantId),
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!datalogger) {
+      throw new ApiError(404, "Device not found");
+    }
+
+    const deleted = await this.dbClient.deviceDatalogger.update({
+      where: {
+        id: deviceId,
+      },
+      data: {
+        deletedAt: new Date(),
+        online: false,
+        status: "offline",
+      },
+      select: {
+        id: true,
+        deletedAt: true,
+      },
+>>>>>>> e6065e94f413162d0abbd35beff57430f22e9207
     });
 
     return {
@@ -1330,6 +1580,7 @@ async deleteDevice(params: DeviceDeleteParams) {
     };
   }
 
+<<<<<<< HEAD
   const datalogger = await this.dbClient.deviceDatalogger.findFirst({
     where: {
       id: deviceId,
@@ -1392,6 +1643,8 @@ async deleteDevice(params: DeviceDeleteParams) {
   };
 }
 
+=======
+>>>>>>> e6065e94f413162d0abbd35beff57430f22e9207
   async getDeviceDayChartLogs(params: { sno: string; date: string }) {
     const [year, month, day] = params.date.split("-").map(Number);
 
