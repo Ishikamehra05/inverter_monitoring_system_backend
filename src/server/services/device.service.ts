@@ -18,6 +18,7 @@ import type { User } from "@/server/utils/auth-helper";
 import { resolveUserScope } from "@/server/utils/scope-resolver";
 import { UserRepository } from "@/server/repositories/user.repository";
 import { Decimal } from "@prisma/client/runtime/client";
+import { POWER_UNIT } from "../../../constants";
 
 export interface DeviceChartServiceParams {
   user: User;
@@ -562,7 +563,7 @@ export class DeviceService {
       {
         key: "outputPower",
         label: "Output Power",
-        value: `${Number(log.total_input_power)} kW`,
+        value: `${Number(log.total_input_power)} ${POWER_UNIT}`,
       },
       {
         key: "temperature",
@@ -955,7 +956,7 @@ export class DeviceService {
           {
             key: "total",
             label: "Power",
-            unit: "kW",
+            unit: POWER_UNIT,
             color: "#2f80ed",
           },
         ],
@@ -1042,9 +1043,14 @@ export class DeviceService {
     return this.deviceRepository.deleteDevice(params);
   }
 
-  listInverters(params: { scope: string[] | "all"; page: number; pageSize: number; search?: string }) {
-		return this.deviceRepository.listInverters(params);
-	}
+  listInverters(params: {
+    scope: string[] | "all";
+    page: number;
+    pageSize: number;
+    search?: string;
+  }) {
+    return this.deviceRepository.listInverters(params);
+  }
 
   async getDeviceChart(params: DeviceChartServiceParams) {
     const repoParams: DeviceChartContextParams = {
@@ -1399,6 +1405,11 @@ export async function exportDeviceLogs(params: DeviceLogsExportServiceParams) {
   return deviceService.exportDeviceLogs(params);
 }
 
-export async function listInverters(params: { scope: string[] | "all"; page: number; pageSize: number; search?: string }) {
-	return deviceService.listInverters(params);
+export async function listInverters(params: {
+  scope: string[] | "all";
+  page: number;
+  pageSize: number;
+  search?: string;
+}) {
+  return deviceService.listInverters(params);
 }

@@ -1,6 +1,6 @@
-import { ApiError } from '@/server/utils/api-error';
-import { User } from '@/server/utils/auth-helper';
-import { resolveUserScope } from '@/server/utils/scope-resolver';
+import { ApiError } from "@/server/utils/api-error";
+import { User } from "@/server/utils/auth-helper";
+import { resolveUserScope } from "@/server/utils/scope-resolver";
 import {
   PlantRepository,
   type PlantInformationRecord,
@@ -19,12 +19,10 @@ import {
   type PlantDeviceOverviewParams,
   type PlantDeviceOverviewLiveParams,
   type PlantDeviceOverviewSnapshot,
-  type UserLogsParams
-} from '@/server/repositories/plant.repository';
-import { UserRepository } from '@/server/repositories/user.repository';
-
-
-
+  type UserLogsParams,
+} from "@/server/repositories/plant.repository";
+import { UserRepository } from "@/server/repositories/user.repository";
+import { POWER_UNIT } from "../../../constants";
 
 export interface UserLogsServiceParams {
   user: User;
@@ -73,7 +71,7 @@ export interface PlantLogsExportServiceParams {
   event?: string;
   dateFrom?: string;
   dateTo?: string;
-  format: 'csv';
+  format: "csv";
   fromService?: boolean;
   targetEndUserId?: string;
 }
@@ -102,22 +100,27 @@ type TelemetryStats = {
 };
 
 class PlantService {
-  constructor(private readonly plantRepository: PlantRepository = new PlantRepository()) { }
+  constructor(
+    private readonly plantRepository: PlantRepository = new PlantRepository(),
+  ) {}
 
   private formatDateTime(value: Date): string {
-    return value.toISOString().replace('T', ' ').slice(0, 19);
+    return value.toISOString().replace("T", " ").slice(0, 19);
   }
 
-  private resolveDeviceStatus(online: boolean, status: string): 'online' | 'offline' | 'abnormal' {
+  private resolveDeviceStatus(
+    online: boolean,
+    status: string,
+  ): "online" | "offline" | "abnormal" {
     if (!online) {
-      return 'offline';
+      return "offline";
     }
 
-    if (status.includes('fault') || status.includes('abnormal')) {
-      return 'abnormal';
+    if (status.includes("fault") || status.includes("abnormal")) {
+      return "abnormal";
     }
 
-    return 'online';
+    return "online";
   }
 
   // private toOverviewResponse(snapshot: PlantDeviceOverviewSnapshot) {
@@ -199,22 +202,16 @@ class PlantService {
     const userRepository = new UserRepository();
 
     const hasServiceRole =
-      user.role === 'service_admin' ||
-      user.role === 'service_super_admin';
+      user.role === "service_admin" || user.role === "service_super_admin";
 
     if (fromService && hasServiceRole && targetEndUserId) {
       const accountScope =
-        await userRepository.getAccountScopeByUserId(
-          targetEndUserId,
-        );
+        await userRepository.getAccountScopeByUserId(targetEndUserId);
 
-      console.log('accountScope =>', accountScope);
+      console.log("accountScope =>", accountScope);
 
       if (!accountScope) {
-        throw new ApiError(
-          404,
-          'Selected end user not found',
-        );
+        throw new ApiError(404, "Selected end user not found");
       }
 
       return accountScope;
@@ -225,11 +222,11 @@ class PlantService {
 
   private assertPlantAccess(scope: string[], plant: PlantInformationRecord) {
     if (!scope || scope.length === 0) {
-      throw new ApiError(403, 'Unauthorized access to plants');
+      throw new ApiError(403, "Unauthorized access to plants");
     }
 
     if (!scope.includes(plant.userAccount)) {
-      throw new ApiError(403, 'You do not have access to this plant.');
+      throw new ApiError(403, "You do not have access to this plant.");
     }
   }
 
@@ -249,11 +246,9 @@ class PlantService {
       updatedAt: Date | null;
     }>,
   ) {
-    const lat =
-      Number(plant.latitude ?? 0);
+    const lat = Number(plant.latitude ?? 0);
 
-    const lon =
-      Number(plant.longitude ?? 0);
+    const lon = Number(plant.longitude ?? 0);
 
     /* ==========================
        Latest Telemetry Values
@@ -261,33 +256,19 @@ class PlantService {
 
     const inputPowerKw =
       telemetryRows.reduce(
-        (sum, row) =>
-          sum +
-          Number(
-            row.currentPower ?? 0,
-          ),
+        (sum, row) => sum + Number(row.currentPower ?? 0),
         0,
       ) / 1000;
 
-    const totalEnergyKwh =
-      telemetryRows.reduce(
-        (sum, row) =>
-          sum +
-          Number(
-            row.totalEnergy ?? 0,
-          ),
-        0,
-      );
+    const totalEnergyKwh = telemetryRows.reduce(
+      (sum, row) => sum + Number(row.totalEnergy ?? 0),
+      0,
+    );
 
-    const totalHours =
-      telemetryRows.reduce(
-        (sum, row) =>
-          sum +
-          Number(
-            row.totalHours ?? 0,
-          ),
-        0,
-      );
+    const totalHours = telemetryRows.reduce(
+      (sum, row) => sum + Number(row.totalHours ?? 0),
+      0,
+    );
 
     /* ==========================
        External APIs
@@ -321,19 +302,13 @@ class PlantService {
     };
 
     try {
-      const [
-        weatherRes,
-        irradianceRes,
-      ] = await Promise.all([
+      const [weatherRes, irradianceRes] = await Promise.all([
         fetch(weatherUrl, {
           next: {
             revalidate: 300,
           },
 
-          signal:
-            AbortSignal.timeout(
-              5000,
-            ),
+          signal: AbortSignal.timeout(5000),
         }),
 
         fetch(irradianceUrl, {
@@ -341,161 +316,82 @@ class PlantService {
             revalidate: 300,
           },
 
-          signal:
-            AbortSignal.timeout(
-              5000,
-            ),
+          signal: AbortSignal.timeout(5000),
         }),
       ]);
 
-      weatherData =
-        weatherRes.ok
-          ? await weatherRes.json()
-          : weatherData;
+      weatherData = weatherRes.ok ? await weatherRes.json() : weatherData;
 
-      irradianceData =
-        irradianceRes.ok
-          ? await irradianceRes.json()
-          : irradianceData;
-
+      irradianceData = irradianceRes.ok
+        ? await irradianceRes.json()
+        : irradianceData;
     } catch (err) {
-      console.error(
-        "Telemetry API error",
-        err,
-      );
+      console.error("Telemetry API error", err);
     }
 
     /* ==========================
        Irradiance
     ========================== */
 
-    const times =
-      irradianceData?.hourly?.time ??
-      [];
+    const times = irradianceData?.hourly?.time ?? [];
 
-    const values =
-      irradianceData?.hourly
-        ?.shortwave_radiation_instant ??
-      [];
+    const values = irradianceData?.hourly?.shortwave_radiation_instant ?? [];
 
-    const now =
-      new Date();
+    const now = new Date();
 
     now.setSeconds(0, 0);
 
-    now.setMinutes(
-      Math.floor(
-        now.getMinutes() / 15,
-      ) * 15,
-    );
+    now.setMinutes(Math.floor(now.getMinutes() / 15) * 15);
 
-    const currentTime =
-      now.toISOString().slice(
-        0,
-        16,
-      );
+    const currentTime = now.toISOString().slice(0, 16);
 
-    const index =
-      times.indexOf(
-        currentTime,
-      );
+    const index = times.indexOf(currentTime);
 
-    const irradianceWm2 =
-      index !== -1
-        ? Number(
-          values[index] ?? 0,
-        )
-        : 0;
+    const irradianceWm2 = index !== -1 ? Number(values[index] ?? 0) : 0;
 
     /* ==========================
        Temperature
     ========================== */
 
-    const ambientTemp =
-      Number(
-        weatherData?.main?.temp ??
-        0,
-      );
+    const ambientTemp = Number(weatherData?.main?.temp ?? 0);
 
-    const noct =
-      Number(
-        process.env.NOCT ??
-        45,
-      );
+    const noct = Number(process.env.NOCT ?? 45);
 
-    const cellTemperatureC =
-      ambientTemp +
-      (irradianceWm2 / 800) *
-      (noct - 20);
+    const cellTemperatureC = ambientTemp + (irradianceWm2 / 800) * (noct - 20);
 
     /* ==========================
        Efficiency
     ========================== */
 
-    let currentEfficiency =
-      0;
+    let currentEfficiency = 0;
 
-    if (
-      totalHours > 0 &&
-      plant.kwp &&
-      plant.kwp > 0
-    ) {
-      const avgPower =
-        totalEnergyKwh /
-        totalHours;
+    if (totalHours > 0 && plant.kwp && plant.kwp > 0) {
+      const avgPower = totalEnergyKwh / totalHours;
 
-      currentEfficiency =
-        (avgPower /
-          plant.kwp) *
-        100;
+      currentEfficiency = (avgPower / plant.kwp) * 100;
 
-      currentEfficiency =
-        Math.min(
-          Math.max(
-            currentEfficiency,
-            0,
-          ),
-          100,
-        );
+      currentEfficiency = Math.min(Math.max(currentEfficiency, 0), 100);
     }
 
     /* ==========================
        CO2
     ========================== */
 
-    const gef =
-      Number(
-        process.env
-          .GRID_EMISSION_FACTOR ??
-        0.82,
-      );
+    const gef = Number(process.env.GRID_EMISSION_FACTOR ?? 0.82);
 
-    const co2Ton =
-      (totalEnergyKwh *
-        gef) /
-      1000;
+    const co2Ton = (totalEnergyKwh * gef) / 1000;
 
     const treePlanting =
-      (co2Ton * 1000) /
-      Number(
-        process.env
-          .CO2_ABSORPTION_FACTOR ??
-        22,
-      );
+      (co2Ton * 1000) / Number(process.env.CO2_ABSORPTION_FACTOR ?? 22);
 
     /* ==========================
        Latest Timestamp
     ========================== */
 
     const latestUpdatedAt =
-      telemetryRows
-        .sort(
-          (a, b) =>
-            b.latestTimestamp.getTime() -
-            a.latestTimestamp.getTime(),
-        )[0]
-        ?.latestTimestamp ??
-      new Date();
+      telemetryRows.sort(
+        (a, b) => b.latestTimestamp.getTime() - a.latestTimestamp.getTime(),
+      )[0]?.latestTimestamp ?? new Date();
 
     return {
       inputPowerKw,
@@ -506,19 +402,13 @@ class PlantService {
 
       currentEfficiency,
 
-      weather:
-        weatherData?.weather?.[0]
-          ?.description ??
-        "N/A",
+      weather: weatherData?.weather?.[0]?.description ?? "N/A",
 
       irradianceWm2,
 
       cellTemperatureC,
 
-      updatedAt:
-        this.formatDateTime(
-          latestUpdatedAt,
-        ),
+      updatedAt: this.formatDateTime(latestUpdatedAt),
     };
   }
   getPlantList(params: PlantListParams) {
@@ -573,124 +463,127 @@ class PlantService {
     return this.plantRepository.getPlantCurrentAlerts(params);
   }
 
-
-
   async getPlantInformation(params: PlantInformationParams) {
-    const scope = await this.resolveScope(params.user, params.fromService, params.targetEndUserId);
+    const scope = await this.resolveScope(
+      params.user,
+      params.fromService,
+      params.targetEndUserId,
+    );
     if (scope.length === 0) {
-      throw new ApiError(403, 'Unauthorized access to plants');
+      throw new ApiError(403, "Unauthorized access to plants");
     }
 
-    const plant = await this.plantRepository.findPlantInformationById(params.plantId);
+    const plant = await this.plantRepository.findPlantInformationById(
+      params.plantId,
+    );
     if (!plant) {
-      throw new ApiError(404, 'Plant not found.');
+      throw new ApiError(404, "Plant not found.");
     }
 
     this.assertPlantAccess(scope, plant);
 
-    const [
-      dataloggers,
-      inverterSerials,
-    ] = await Promise.all([
-      this.plantRepository
-        .listPlantDataloggers(
-          params.plantId,
-        ),
+    const [dataloggers, inverterSerials] = await Promise.all([
+      this.plantRepository.listPlantDataloggers(params.plantId),
 
-      this.plantRepository
-        .listPlantInverterSerials(
-          BigInt(params.plantId),
-        )
+      this.plantRepository.listPlantInverterSerials(BigInt(params.plantId)),
     ]);
 
-    const serialNumbers =
-      inverterSerials.map(
-        x => x.serialNumber,
-      );
+    const serialNumbers = inverterSerials.map((x) => x.serialNumber);
 
     const telemetryRows =
-      await this.plantRepository
-        .getLatestTelemetryBySerials(
-          serialNumbers,
-        );
+      await this.plantRepository.getLatestTelemetryBySerials(serialNumbers);
 
-    const telemetry =
-      await this.calculateTelemetryStats(
-        plant,
-        telemetryRows,
-      );
+    const telemetry = await this.calculateTelemetryStats(plant, telemetryRows);
 
     return {
-      installationDate: plant.installed ? plant.installed.toISOString().slice(0, 10) : null,
+      installationDate: plant.installed
+        ? plant.installed.toISOString().slice(0, 10)
+        : null,
       capacity: `${Number((plant.kwp ?? 0).toFixed(2))} kW`,
       address: plant.address ?? null,
       dataloggerSn: dataloggers.map((item) => item.serialNumber),
       stats: [
         {
-          label: 'Input Power',
-          value: `${telemetry.inputPowerKw.toFixed(2)} kW`,
-          icon: '/images/information-tab/info-img-1.png',
+          label: "Input Power",
+          value: `${telemetry.inputPowerKw.toFixed(2)} ${POWER_UNIT}`,
+          icon: "/images/information-tab/info-img-1.png",
         },
         {
-          label: 'CO2',
+          label: "CO2",
           value: `${telemetry.co2Ton.toFixed(2)}t`,
-          icon: '/images/information-tab/info-img-2.png',
+          icon: "/images/information-tab/info-img-2.png",
         },
         {
-          label: 'Tree Planting',
+          label: "Tree Planting",
           value: `${telemetry.treePlanting.toFixed(2)}`,
-          icon: '/images/information-tab/info-img-3.png',
+          icon: "/images/information-tab/info-img-3.png",
         },
         {
-          label: 'Efficiency',
+          label: "Efficiency",
           value: `${telemetry.currentEfficiency.toFixed(2)}`,
-          icon: '/images/information-tab/info-img-4.png',
+          icon: "/images/information-tab/info-img-4.png",
         },
         {
-          label: 'Weather',
+          label: "Weather",
           value: telemetry.weather,
-          icon: '/images/information-tab/info-img-5.png',
+          icon: "/images/information-tab/info-img-5.png",
         },
         {
-          label: 'Irradiance',
+          label: "Irradiance",
           value: `${telemetry.irradianceWm2} W/m2`,
-          icon: '/images/information-tab/info-img-6.png',
+          icon: "/images/information-tab/info-img-6.png",
         },
         {
-          label: 'Cell Temperature',
+          label: "Cell Temperature",
           value: `${telemetry.cellTemperatureC} C`,
-          icon: '/images/information-tab/info-img-7.png',
+          icon: "/images/information-tab/info-img-7.png",
         },
       ],
-      updatedAt:
-        telemetry.updatedAt,
+      updatedAt: telemetry.updatedAt,
     };
   }
 
   async addPlantLogger(params: AddPlantLoggerParams) {
-    const scope = await this.resolveScope(params.user, params.fromService, params.targetEndUserId);
+    const scope = await this.resolveScope(
+      params.user,
+      params.fromService,
+      params.targetEndUserId,
+    );
     if (scope.length === 0) {
-      throw new ApiError(403, 'Unauthorized access to plants');
+      throw new ApiError(403, "Unauthorized access to plants");
     }
 
-    const plant = await this.plantRepository.findPlantInformationById(params.plantId);
+    const plant = await this.plantRepository.findPlantInformationById(
+      params.plantId,
+    );
     if (!plant) {
-      throw new ApiError(404, 'Plant not found.');
+      throw new ApiError(404, "Plant not found.");
     }
 
     this.assertPlantAccess(scope, plant);
 
     const normalizedSerialNumber = params.serialNumber.trim();
-    const existingLogger = await this.plantRepository.findDataloggerBySerialNumber(normalizedSerialNumber);
+    const existingLogger =
+      await this.plantRepository.findDataloggerBySerialNumber(
+        normalizedSerialNumber,
+      );
 
     if (existingLogger && !existingLogger.deletedAt) {
-      throw new ApiError(409, 'Logger serial number is already linked.');
+      throw new ApiError(409, "Logger serial number is already linked.");
     }
 
     const linked = existingLogger
-      ? await this.plantRepository.restorePlantLogger(existingLogger.id, params.plantId, normalizedSerialNumber)
-      : await this.plantRepository.createPlantLogger(params.plantId, normalizedSerialNumber);
-    const linkedAt = 'updatedAt' in linked ? linked.updatedAt : linked.createdAt;
+      ? await this.plantRepository.restorePlantLogger(
+          existingLogger.id,
+          params.plantId,
+          normalizedSerialNumber,
+        )
+      : await this.plantRepository.createPlantLogger(
+          params.plantId,
+          normalizedSerialNumber,
+        );
+    const linkedAt =
+      "updatedAt" in linked ? linked.updatedAt : linked.createdAt;
 
     return {
       deviceId: `logger-${String(linked.id)}`,
@@ -817,7 +710,11 @@ class PlantService {
   }
 
   async getPlantLogs(params: PlantLogsServiceParams) {
-    const scope = await this.resolveScope(params.user, params.fromService, params.targetEndUserId);
+    const scope = await this.resolveScope(
+      params.user,
+      params.fromService,
+      params.targetEndUserId,
+    );
     console.log({
       role: params.user.role,
       fromService: params.fromService,
@@ -825,12 +722,14 @@ class PlantService {
       scope,
     });
     if (scope.length === 0) {
-      throw new ApiError(403, 'Unauthorized access to plants');
+      throw new ApiError(403, "Unauthorized access to plants");
     }
 
-    const plant = await this.plantRepository.findPlantInformationById(params.plantId);
+    const plant = await this.plantRepository.findPlantInformationById(
+      params.plantId,
+    );
     if (!plant) {
-      throw new ApiError(404, 'Plant not found.');
+      throw new ApiError(404, "Plant not found.");
     }
 
     this.assertPlantAccess(scope, plant);
@@ -850,14 +749,20 @@ class PlantService {
   }
 
   async exportPlantLogs(params: PlantLogsExportServiceParams) {
-    const scope = await this.resolveScope(params.user, params.fromService, params.targetEndUserId);
+    const scope = await this.resolveScope(
+      params.user,
+      params.fromService,
+      params.targetEndUserId,
+    );
     if (scope.length === 0) {
-      throw new ApiError(403, 'Unauthorized access to plants');
+      throw new ApiError(403, "Unauthorized access to plants");
     }
 
-    const plant = await this.plantRepository.findPlantInformationById(params.plantId);
+    const plant = await this.plantRepository.findPlantInformationById(
+      params.plantId,
+    );
     if (!plant) {
-      throw new ApiError(404, 'Plant not found.');
+      throw new ApiError(404, "Plant not found.");
     }
 
     this.assertPlantAccess(scope, plant);
@@ -876,7 +781,7 @@ class PlantService {
   }
 
   async getUserLogs(params: UserLogsServiceParams) {
-    console.log('getUserLogs params:', {
+    console.log("getUserLogs params:", {
       userId: params.user.userId,
       role: params.user.role,
       fromService: params.fromService,
@@ -885,16 +790,13 @@ class PlantService {
     const scope = await this.resolveScope(
       params.user,
       params.fromService,
-      params.targetEndUserId
+      params.targetEndUserId,
     );
 
-    console.log('scope =>', scope);
+    console.log("scope =>", scope);
 
     if (scope.length === 0) {
-      throw new ApiError(
-        403,
-        'Unauthorized access to plants'
-      );
+      throw new ApiError(403, "Unauthorized access to plants");
     }
 
     return this.plantRepository.getUserLogs({
@@ -961,14 +863,18 @@ export async function getPlantOverviewLive(params: PlantOverviewParams) {
 /**
  * Get Plant Analysis Device List
  */
-export async function getPlantAnalysisDevices(params: PlantAnalysisDevicesParams) {
+export async function getPlantAnalysisDevices(
+  params: PlantAnalysisDevicesParams,
+) {
   return plantService.getPlantAnalysisDevices(params);
 }
 
 /**
  * Get Plant Analysis Parameter List for active device
  */
-export async function getPlantAnalysisParameters(params: PlantAnalysisParametersParams) {
+export async function getPlantAnalysisParameters(
+  params: PlantAnalysisParametersParams,
+) {
   return plantService.getPlantAnalysisParameters(params);
 }
 
@@ -1023,15 +929,21 @@ export async function addPlantLogger(params: AddPlantLoggerParams) {
   return plantService.addPlantLogger(params);
 }
 
-export async function getPlantInformationLive(params: PlantInformationLiveParams) {
+export async function getPlantInformationLive(
+  params: PlantInformationLiveParams,
+) {
   // return plantService.getPlantInformationLive(params);
 }
 
-export async function getPlantDeviceOverview(params: PlantDeviceOverviewServiceParams) {
+export async function getPlantDeviceOverview(
+  params: PlantDeviceOverviewServiceParams,
+) {
   // return plantService.getPlantDeviceOverview(params);
 }
 
-export async function getPlantDeviceOverviewLive(params: PlantDeviceOverviewLiveServiceParams) {
+export async function getPlantDeviceOverviewLive(
+  params: PlantDeviceOverviewLiveServiceParams,
+) {
   // return plantService.getPlantDeviceOverviewLive(params);
 }
 
@@ -1041,7 +953,11 @@ export async function getPlantDeviceOverviewLive(params: PlantDeviceOverviewLive
  * Step 2: Backend loads plant by plantId
  * Step 3: Backend checks plant.ownerUserId against allowed scope
  */
-export async function getPlantDetails(user: User, scope: string[], plantId: string) {
+export async function getPlantDetails(
+  user: User,
+  scope: string[],
+  plantId: string,
+) {
   return plantService.getPlantDetails(user, scope, plantId);
 }
 
@@ -1061,7 +977,12 @@ export async function createPlant(user: User, scope: string[], plantData: any) {
  * Step 2: Backend validates edit permission
  * Step 3: Backend updates plant
  */
-export async function editPlant(user: User, scope: string[], plantId: string, plantData: any) {
+export async function editPlant(
+  user: User,
+  scope: string[],
+  plantId: string,
+  plantData: any,
+) {
   return plantService.editPlant(user, scope, plantId, plantData);
 }
 
@@ -1071,7 +992,11 @@ export async function editPlant(user: User, scope: string[], plantId: string, pl
  * Step 2: Backend validates delete permission
  * Step 3: Backend soft-deletes plant
  */
-export async function deletePlant(user: User, scope: string[], plantId: string) {
+export async function deletePlant(
+  user: User,
+  scope: string[],
+  plantId: string,
+) {
   return plantService.deletePlant(user, scope, plantId);
 }
 
@@ -1099,4 +1024,3 @@ export async function getUserLogs(params: UserLogsServiceParams) {
 export async function exportPlantLogs(params: PlantLogsExportServiceParams) {
   return plantService.exportPlantLogs(params);
 }
-

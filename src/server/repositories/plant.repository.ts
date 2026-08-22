@@ -3,6 +3,7 @@ import { ApiError } from "@/server/utils/api-error";
 import type { User } from "@/server/utils/auth-helper";
 import { PlantStatus, Prisma } from "../db/generated/prisma/client";
 import { Decimal } from "@prisma/client/runtime/client";
+import { POWER_UNIT } from "../../../constants";
 
 export interface UserLogsParams {
   scope: string[];
@@ -231,8 +232,8 @@ export class PlantRepository {
     const power = Array.from({ length: 9 }, (_, i) => ({
       key: `Power${i + 1}`,
       label: `Power${i + 1}`,
-      unit: "kW",
-      axis: "kW",
+      unit: POWER_UNIT,
+      axis: POWER_UNIT,
       group: "Power",
     }));
 
@@ -411,7 +412,6 @@ export class PlantRepository {
 
     const serialNumbers = allDevices.map((device) => device.serialNumber);
 
-
     const alerts = await prisma.alertEvent.findMany({
       where: {
         serialNumber: {
@@ -446,7 +446,7 @@ export class PlantRepository {
           other.serialNumber === alert.serialNumber &&
           other.registerNo === alert.registerNo &&
           other.bitPosition === alert.bitPosition &&
-          other.createdAt > alert.createdAt
+          other.createdAt > alert.createdAt,
       );
 
       return !cleared;
@@ -646,18 +646,18 @@ export class PlantRepository {
 
       const latestLogs = latestConditions.length
         ? await prisma.deviceLogsLatest.findMany({
-          where: {
-            OR: latestConditions,
-          },
+            where: {
+              OR: latestConditions,
+            },
 
-          select: {
-            currentPower: true,
-            dailyProduction: true,
-            totalEnergy: true,
-            totalHours: true,
-            latestTimestamp: true,
-          },
-        })
+            select: {
+              currentPower: true,
+              dailyProduction: true,
+              totalEnergy: true,
+              totalHours: true,
+              latestTimestamp: true,
+            },
+          })
         : [];
 
       aggregates = latestLogs.reduce<{
@@ -715,23 +715,23 @@ export class PlantRepository {
 
         currentStatus: plantStatus
           ? {
-            status: plantStatus.status,
-            totalDevices: plantStatus.totalDevices,
-            normalCount: plantStatus.normalCount,
-            abnormalCount: plantStatus.abnormalCount,
-            standbyCount: plantStatus.standbyCount,
-            offlineCount: plantStatus.offlineCount,
-            updatedAt: plantStatus.updatedAt,
-          }
+              status: plantStatus.status,
+              totalDevices: plantStatus.totalDevices,
+              normalCount: plantStatus.normalCount,
+              abnormalCount: plantStatus.abnormalCount,
+              standbyCount: plantStatus.standbyCount,
+              offlineCount: plantStatus.offlineCount,
+              updatedAt: plantStatus.updatedAt,
+            }
           : {
-            status: PlantStatus.Offline,
-            totalDevices: 0,
-            normalCount: 0,
-            abnormalCount: 0,
-            standbyCount: 0,
-            offlineCount: 0,
-            updatedAt: null,
-          },
+              status: PlantStatus.Offline,
+              totalDevices: 0,
+              normalCount: 0,
+              abnormalCount: 0,
+              standbyCount: 0,
+              offlineCount: 0,
+              updatedAt: null,
+            },
 
         installationDate: plant.installed
           ? plant.installed.toISOString().slice(0, 10)
@@ -748,7 +748,7 @@ export class PlantRepository {
         currentPower: {
           value: Number(aggregates.currentPower.toFixed(2)),
 
-          unit: "kW",
+          unit: POWER_UNIT,
 
           dataType: "live",
         },
@@ -1550,12 +1550,8 @@ export class PlantRepository {
           sn: device.serialNumber,
           event: alert.faultMessage,
           status: "active" as const,
-          startedAt: this.formatDateTime(
-            alert.raisedAt ?? alert.createdAt,
-          ),
-          lastUpdatedAt: this.formatDateTime(
-            alert.raisedAt ?? alert.createdAt,
-          ),
+          startedAt: this.formatDateTime(alert.raisedAt ?? alert.createdAt),
+          lastUpdatedAt: this.formatDateTime(alert.raisedAt ?? alert.createdAt),
         };
       })
       .filter(
@@ -1577,8 +1573,7 @@ export class PlantRepository {
     const totalPages =
       totalItems > 0 ? Math.ceil(totalItems / params.pageSize) : 0;
 
-    const safePage =
-      totalPages > 0 ? Math.min(params.page, totalPages) : 1;
+    const safePage = totalPages > 0 ? Math.min(params.page, totalPages) : 1;
 
     const start = (safePage - 1) * params.pageSize;
 
@@ -1932,6 +1927,7 @@ export class PlantRepository {
           longitude: true,
           latitude: true,
           address: true,
+          pictureFileId: true,
           currentStatus: {
             select: {
               status: true,
@@ -2072,6 +2068,12 @@ export class PlantRepository {
 
           longitude: plant.longitude,
 
+          pictureFileId: plant.pictureFileId,
+
+          pictureUrl: plant.pictureFileId
+            ? `/${plant.pictureFileId.replace(/^\/+/, "")}`
+            : null,
+
           eToday: {
             value: eToday,
 
@@ -2090,7 +2092,7 @@ export class PlantRepository {
           power: {
             value: power,
 
-            unit: "kW",
+            unit: POWER_UNIT,
           },
           // Plant Current Status
           plantStatus: {
@@ -2215,8 +2217,9 @@ export class PlantRepository {
     return {
       fileName: "plant-list.csv",
 
-      downloadUrl: `/api/v1/monitor/plants/list/export/files/plant-list.csv${query.toString() ? `?${query.toString()}` : ""
-        }`,
+      downloadUrl: `/api/v1/monitor/plants/list/export/files/plant-list.csv${
+        query.toString() ? `?${query.toString()}` : ""
+      }`,
 
       expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
 
@@ -2353,7 +2356,7 @@ export class PlantRepository {
         return {
           currentPower: {
             value: 0,
-            unit: "kW",
+            unit: POWER_UNIT,
           },
 
           eToday: {
@@ -2404,7 +2407,7 @@ export class PlantRepository {
         return {
           currentPower: {
             value: 0,
-            unit: "kW",
+            unit: POWER_UNIT,
           },
 
           eToday: {
@@ -2526,7 +2529,7 @@ export class PlantRepository {
         currentPower: {
           value: Number(aggregates.currentPower.toFixed(2)),
 
-          unit: "kW",
+          unit: POWER_UNIT,
         },
 
         eToday: {
@@ -2676,6 +2679,7 @@ export class PlantRepository {
           longitude: true,
           latitude: true,
           address: true,
+          pictureFileId: true,
           // status: true,
         },
       });
@@ -2702,6 +2706,7 @@ export class PlantRepository {
         longitude: plant.longitude || "",
         latitude: plant.latitude || "",
         address: plant.address || "",
+        pictureFileId: plant.pictureFileId || null,
         // status: plant.status,
       };
     } catch (error) {
@@ -2711,71 +2716,71 @@ export class PlantRepository {
     }
   }
 
-//   async createPlant(user: User, scope: string[], plantData: any) {
-//     if (!scope || scope.length === 0) {
-//       throw new ApiError(403, "Unauthorized access to create plant");
-//     }
+  //   async createPlant(user: User, scope: string[], plantData: any) {
+  //     if (!scope || scope.length === 0) {
+  //       throw new ApiError(403, "Unauthorized access to create plant");
+  //     }
 
-//     if (!user.account) {
-//       throw new ApiError(401, "User account not found in token");
-//     }
-//     let plantOwnerAccount = user.account as string;
+  //     if (!user.account) {
+  //       throw new ApiError(401, "User account not found in token");
+  //     }
+  //     let plantOwnerAccount = user.account as string;
 
-//     if (plantData.selectedEndUserId) {
-//       const endUser = await prisma.user.findUnique({
-//         where: {
-//           id: BigInt(plantData.selectedEndUserId),
-//         },
-//         select: {
-//           account: true,
-//         },
-//       });
+  //     if (plantData.selectedEndUserId) {
+  //       const endUser = await prisma.user.findUnique({
+  //         where: {
+  //           id: BigInt(plantData.selectedEndUserId),
+  //         },
+  //         select: {
+  //           account: true,
+  //         },
+  //       });
 
-//       if (!endUser) {
-//         throw new ApiError(404, "Selected end user not found");
-//       }
+  //       if (!endUser) {
+  //         throw new ApiError(404, "Selected end user not found");
+  //       }
 
-//       plantOwnerAccount = endUser.account;
-//     }
+  //       plantOwnerAccount = endUser.account;
+  //     }
 
-//     try {
-//       const newPlant = await prisma.plant.create({
-//         data: {
-//           name: plantData.plantName,
-//           type: plantData.plantType,
-//           userAccount: plantOwnerAccount,
-//           // userAccount: user.account as string,
-//           installed: plantData.installedDate
-//             ? new Date(plantData.installedDate)
-//             : null,
-//           kwp: plantData.kwp || null,
-//           price: plantData.price || null,
-//           priceUnit: plantData.priceUnit || null,
-//           longitude: plantData.longitude || null,
-//           latitude: plantData.latitude || null,
-//           address: plantData.address || null,
-//           pictureFileId: plantData.pictureFileId || null,
-//           // status: 'Offline',
-//         },
-//         select: {
-//           id: true,
-//           userAccount: true,
-//           createdAt: true,
-//         },
-//       });
+  //     try {
+  //       const newPlant = await prisma.plant.create({
+  //         data: {
+  //           name: plantData.plantName,
+  //           type: plantData.plantType,
+  //           userAccount: plantOwnerAccount,
+  //           // userAccount: user.account as string,
+  //           installed: plantData.installedDate
+  //             ? new Date(plantData.installedDate)
+  //             : null,
+  //           kwp: plantData.kwp || null,
+  //           price: plantData.price || null,
+  //           priceUnit: plantData.priceUnit || null,
+  //           longitude: plantData.longitude || null,
+  //           latitude: plantData.latitude || null,
+  //           address: plantData.address || null,
+  //           pictureFileId: plantData.pictureFileId || null,
+  //           // status: 'Offline',
+  //         },
+  //         select: {
+  //           id: true,
+  //           userAccount: true,
+  //           createdAt: true,
+  //         },
+  //       });
 
-//       return {
-//         id: String(newPlant.id),
-//         ownerUserId: newPlant.userAccount,
-//         createdAt: newPlant.createdAt.toISOString(),
-//       };
-//     } catch (error) {
-//       console.error("Error creating plant:", error);
-//       throw new ApiError(500, "Failed to create plant");
-//     }
-//   }
+  //       return {
+  //         id: String(newPlant.id),
+  //         ownerUserId: newPlant.userAccount,
+  //         createdAt: newPlant.createdAt.toISOString(),
+  //       };
+  //     } catch (error) {
+  //       console.error("Error creating plant:", error);
+  //       throw new ApiError(500, "Failed to create plant");
+  //     }
+  //   }
 
-async createPlant(user: User, scope: string[], plantData: any) {
+  async createPlant(user: User, scope: string[], plantData: any) {
     if (!scope || scope.length === 0) {
       throw new ApiError(403, "Unauthorized access to create plant");
     }
@@ -2846,15 +2851,15 @@ async createPlant(user: User, scope: string[], plantData: any) {
         createdAt: newPlant.createdAt.toISOString(),
       };
     } catch (error: any) {
-  if (error instanceof ApiError) {
-    throw error;
+      if (error instanceof ApiError) {
+        throw error;
+      }
+
+      console.error(error);
+      throw new ApiError(500, "Failed to create plant");
+    }
   }
 
-  console.error(error);
-  throw new ApiError(500, "Failed to create plant");
-}
-  }
-  
   async editPlant(scope: string[], plantId: string, plantData: any) {
     if (!scope || scope.length === 0) {
       throw new ApiError(403, "Unauthorized access to edit plant");
@@ -2890,7 +2895,10 @@ async createPlant(user: User, scope: string[], plantData: any) {
           longitude: plantData.longitude || null,
           latitude: plantData.latitude || null,
           address: plantData.address || null,
-          pictureFileId: plantData.pictureFileId || null,
+          pictureFileId:
+            plantData.pictureFileId !== undefined
+              ? plantData.pictureFileId || null
+              : undefined,
           updatedAt: new Date(),
         },
         select: {
@@ -3235,9 +3243,7 @@ async createPlant(user: User, scope: string[], plantData: any) {
 
     let logs: PlantLogRecord[] = alerts
       .map((alert) => {
-        const device = allDevices.find(
-          (d) => d.sn === alert.serialNumber,
-        );
+        const device = allDevices.find((d) => d.sn === alert.serialNumber);
 
         if (!device) {
           return null;
@@ -3248,9 +3254,7 @@ async createPlant(user: User, scope: string[], plantData: any) {
           name: device.name,
           type: device.type,
           sn: device.sn,
-          time: this.formatDateTime(
-            alert.raisedAt ?? alert.createdAt,
-          ),
+          time: this.formatDateTime(alert.raisedAt ?? alert.createdAt),
           status: alert.status === "ACTIVE" ? "Active" : "Inactive",
           event: alert.faultMessage,
         };
@@ -3275,17 +3279,14 @@ async createPlant(user: User, scope: string[], plantData: any) {
 
     // Latest first
     logs.sort(
-      (a, b) =>
-        new Date(b.time).getTime() -
-        new Date(a.time).getTime(),
+      (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime(),
     );
 
     const totalItems = logs.length;
     const totalPages =
       totalItems > 0 ? Math.ceil(totalItems / params.pageSize) : 0;
 
-    const safePage =
-      totalPages > 0 ? Math.min(params.page, totalPages) : 1;
+    const safePage = totalPages > 0 ? Math.min(params.page, totalPages) : 1;
 
     const start = (safePage - 1) * params.pageSize;
 
@@ -3385,9 +3386,7 @@ async createPlant(user: User, scope: string[], plantData: any) {
 
     let logs = alerts
       .map((alert) => {
-        const device = allDevices.find(
-          (d) => d.sn === alert.serialNumber,
-        );
+        const device = allDevices.find((d) => d.sn === alert.serialNumber);
 
         if (!device) {
           return null;
@@ -3398,9 +3397,7 @@ async createPlant(user: User, scope: string[], plantData: any) {
           name: device.name,
           type: device.type,
           sn: device.sn,
-          time: this.formatDateTime(
-            alert.raisedAt ?? alert.createdAt,
-          ),
+          time: this.formatDateTime(alert.raisedAt ?? alert.createdAt),
           status: alert.status === "ACTIVE" ? "Active" : "Inactive",
           event: alert.faultMessage,
         };
@@ -3424,15 +3421,7 @@ async createPlant(user: User, scope: string[], plantData: any) {
     }
 
     if (params.format === "csv") {
-      const headers = [
-        "ID",
-        "Name",
-        "Type",
-        "S/N",
-        "Time",
-        "Status",
-        "Event",
-      ];
+      const headers = ["ID", "Name", "Type", "S/N", "Time", "Status", "Event"];
 
       const rows = [headers.join(",")];
 
@@ -3456,16 +3445,11 @@ async createPlant(user: User, scope: string[], plantData: any) {
         fileName,
         csv: rows.join("\n"),
         downloadUrl: `/api/v1/monitor/plants/${params.plantId}/logs/export/files/${fileName}`,
-        expiresAt: new Date(
-          Date.now() + 15 * 60 * 1000,
-        ).toISOString(),
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
       };
     }
 
-    throw new ApiError(
-      400,
-      `Unsupported export format: ${params.format}`,
-    );
+    throw new ApiError(400, `Unsupported export format: ${params.format}`);
   }
 
   async getUserLogs(params: UserLogsParams) {
@@ -3579,9 +3563,7 @@ async createPlant(user: User, scope: string[], plantData: any) {
           account: plantInfo.account,
           type: inverter.type,
           sn: alert.serialNumber,
-          time: this.formatDateTime(
-            alert.raisedAt ?? alert.createdAt,
-          ),
+          time: this.formatDateTime(alert.raisedAt ?? alert.createdAt),
           status: alert.status === "ACTIVE" ? "Active" : "Inactive",
           event: alert.faultMessage,
           updatedAt: alert.raisedAt ?? alert.createdAt,
@@ -3621,16 +3603,13 @@ async createPlant(user: User, scope: string[], plantData: any) {
     }
 
     // Latest first
-    logs.sort(
-      (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
-    );
+    logs.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
     const totalItems = logs.length;
     const totalPages =
       totalItems > 0 ? Math.ceil(totalItems / params.pageSize) : 0;
 
-    const safePage =
-      totalPages > 0 ? Math.min(params.page, totalPages) : 1;
+    const safePage = totalPages > 0 ? Math.min(params.page, totalPages) : 1;
 
     const start = (safePage - 1) * params.pageSize;
 

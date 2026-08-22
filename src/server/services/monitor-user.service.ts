@@ -8,7 +8,8 @@ import type {
   MonitorUserPlantsQueryInput,
   MonitorUserStatusCountsQueryInput,
   RelateUserBodyInput,
-} from '@/server/validators/monitor-user.validator';
+} from "@/server/validators/monitor-user.validator";
+import { POWER_UNIT } from "../../../constants";
 
 interface ServiceError {
   status: 400 | 401 | 403 | 404 | 409 | 500;
@@ -294,7 +295,7 @@ function toRow(item: MonitorUserSummary): MonitorUserItem {
     capacity: item.capacity,
     power: {
       value: item.power,
-      unit: "kW",
+      unit: POWER_UNIT,
     },
     today: {
       value: item.today,
@@ -315,7 +316,7 @@ function toRow(item: MonitorUserSummary): MonitorUserItem {
 export class MonitorUserService {
   constructor(
     private readonly monitorUserRepository: MonitorUserRepository = new MonitorUserRepository(),
-  ) { }
+  ) {}
 
   private async getActor(actorId: bigint) {
     return this.monitorUserRepository.findActorById(actorId);
@@ -406,8 +407,8 @@ export class MonitorUserService {
     const latestLogs =
       serialNumbers.length > 0
         ? await this.monitorUserRepository.findLatestLogsBySerialNumbers(
-          serialNumbers,
-        )
+            serialNumbers,
+          )
         : [];
 
     const affiliationById = new Map(
@@ -485,7 +486,6 @@ export class MonitorUserService {
       const serialNumbers: string[] = [];
 
       for (const plant of userPlants) {
-
         const plantStatus = statusByPlantId.get(String(plant.id));
 
         if (plantStatus) {
@@ -583,22 +583,22 @@ export class MonitorUserService {
 
   private buildMonitorUserCsv(items: MonitorUserItem[]): string {
     const headers = [
-      'Account',
-      'Serial Number',
-      'Installation Date',
-      'Affiliation',
-      'Capacity (kWp)',
-      'Power',
-      'Power Unit',
-      'E-Today',
-      'E-Today Unit',
-      'E-Total',
-      'E-Total Unit',
-      'Status',
+      "Account",
+      "Serial Number",
+      "Installation Date",
+      "Affiliation",
+      "Capacity (kWp)",
+      "Power",
+      "Power Unit",
+      "E-Today",
+      "E-Today Unit",
+      "E-Total",
+      "E-Total Unit",
+      "Status",
     ];
 
     const escape = (value: unknown): string =>
-      `"${String(value ?? '').replace(/"/g, '""')}"`;
+      `"${String(value ?? "").replace(/"/g, '""')}"`;
 
     const rows = items.map((item) => [
       escape(item.account),
@@ -613,18 +613,12 @@ export class MonitorUserService {
       escape(item.total.value),
       escape(item.total.unit),
       escape(
-        `online:${item.status.online}, abnormal:${item.status.abnormal}, Standby:${item.status.standby}, Offline:${item.status.offline},`
+        `online:${item.status.online}, abnormal:${item.status.abnormal}, Standby:${item.status.standby}, Offline:${item.status.offline},`,
       ),
     ]);
 
-    return [
-      headers.join(','),
-      ...rows.map((row) => row.join(',')),
-    ].join('\n');
+    return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
   }
-
-
-
 
   async getMonitorUserList(
     actorId: bigint,
@@ -702,17 +696,13 @@ export class MonitorUserService {
     message: string;
     csv: string;
   }> {
-    const result = await this.getMonitorUserList(
-      actorId,
-      actorRole,
-      query,
-    );
+    const result = await this.getMonitorUserList(actorId, actorRole, query);
 
     if (result.status !== 200) {
       return {
         status: result.status,
         message: result.message,
-        csv: '',
+        csv: "",
       };
     }
 
@@ -720,7 +710,7 @@ export class MonitorUserService {
 
     return {
       status: 200,
-      message: 'Monitor users exported successfully.',
+      message: "Monitor users exported successfully.",
       csv,
     };
   }
@@ -730,7 +720,7 @@ export class MonitorUserService {
     query: MonitorUserStatusCountsQueryInput,
   ): Promise<MonitorUserStatusCountsResult> {
     const actor = await this.validateActor(actorId, actorRole);
-    if ('status' in actor) {
+    if ("status" in actor) {
       return actor;
     }
     const loginUser: LoginUserData = actor;
@@ -800,7 +790,7 @@ export class MonitorUserService {
       data: {
         items: summaries.map((item) => ({
           id: String(item.id),
-          power: { value: item.power, unit: "kW" },
+          power: { value: item.power, unit: POWER_UNIT },
           today: { value: item.today, unit: "kWh" },
           total: { value: item.total, unit: "kWh" },
           status: item.status,
@@ -847,9 +837,9 @@ export class MonitorUserService {
     const [inverters, dataloggers] =
       plantIds.length > 0
         ? await Promise.all([
-          this.monitorUserRepository.findInvertersByPlantIds(plantIds),
-          this.monitorUserRepository.findDataloggersByPlantIds(plantIds),
-        ])
+            this.monitorUserRepository.findInvertersByPlantIds(plantIds),
+            this.monitorUserRepository.findDataloggersByPlantIds(plantIds),
+          ])
         : [[], []];
 
     const deviceEntriesByPlant = new Map<
@@ -902,35 +892,35 @@ export class MonitorUserService {
   }
 
   private async validateTargetServiceUser(
-  targetUserId: bigint,
-  actorId: bigint,
-  actorRole: string | undefined,
-): Promise<ServiceError | null> {
-  const target =
-    await this.monitorUserRepository.findTargetServiceUser(targetUserId);
+    targetUserId: bigint,
+    actorId: bigint,
+    actorRole: string | undefined,
+  ): Promise<ServiceError | null> {
+    const target =
+      await this.monitorUserRepository.findTargetServiceUser(targetUserId);
 
-  if (!target) {
-    return {
-      status: 404,
-      message: "Target service user not found",
-    };
-  }
+    if (!target) {
+      return {
+        status: 404,
+        message: "Target service user not found",
+      };
+    }
 
-  // Service Super Admin can assign to any service admin
-  if (actorRole === "service_super_admin") {
+    // Service Super Admin can assign to any service admin
+    if (actorRole === "service_super_admin") {
+      return null;
+    }
+
+    // Service Admin can assign only to themselves
+    if (actorRole === "service_admin" && target.id !== actorId) {
+      return {
+        status: 403,
+        message: "You can only assign monitor users to your own account",
+      };
+    }
+
     return null;
   }
-
-  // Service Admin can assign only to themselves
-  if (actorRole === "service_admin" && target.id !== actorId) {
-    return {
-      status: 403,
-      message: "You can only assign monitor users to your own account",
-    };
-  }
-
-  return null;
-}
 
   private async updateMonitorUsersOwnership(
     monitorUserIdentifiers: string[],
@@ -1055,7 +1045,7 @@ export class MonitorUserService {
     input: RelateUserBodyInput,
   ) {
     const actor = await this.validateActor(actorId, actorRole);
-    if ('status' in actor) {
+    if ("status" in actor) {
       return actor;
     }
 
@@ -1066,19 +1056,18 @@ export class MonitorUserService {
     if (!user) {
       return {
         status: 404,
-        message: 'Monitor user not found.',
+        message: "Monitor user not found.",
       };
     }
 
-    const existing =
-      await this.monitorUserRepository.findMappingBySerialNumber(
-        input.serialNumber,
-      );
+    const existing = await this.monitorUserRepository.findMappingBySerialNumber(
+      input.serialNumber,
+    );
 
     if (existing) {
       return {
         status: 409,
-        message: 'Serial number is already assigned.',
+        message: "Serial number is already assigned.",
       };
     }
 
@@ -1089,7 +1078,7 @@ export class MonitorUserService {
 
     return {
       status: 200,
-      message: 'User related successfully.',
+      message: "User related successfully.",
       data: {
         account: user.account,
         serialNumber: input.serialNumber,
@@ -1108,10 +1097,10 @@ export class MonitorUserService {
     }
 
     const targetError = await this.validateTargetServiceUser(
-  input.assignedToUserId,
-  actorId,
-  actorRole,
-);
+      input.assignedToUserId,
+      actorId,
+      actorRole,
+    );
     if (targetError) {
       return targetError;
     }

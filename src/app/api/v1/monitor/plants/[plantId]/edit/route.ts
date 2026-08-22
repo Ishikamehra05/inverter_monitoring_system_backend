@@ -10,6 +10,7 @@ import type { User } from '@/server/utils/auth-helper';
 import { resolveUserScope } from '@/server/utils/scope-resolver';
 import { PlantEditValidator } from '@/server/validators/plant.validator';
 import { UserRepository } from '@/server/repositories/user.repository';
+import { readPlantRequest, savePlantPicture } from '@/server/utils/plant-picture';
 
 const userRepository = new UserRepository();
 
@@ -92,11 +93,12 @@ async function postPlantEditRoute(
 		return errorResponse('Invalid plant id', 400);
 	}
 
-	let body: unknown;
+	let body: Record<string, unknown>;
+	let picture: File | undefined;
 	try {
-		body = await request.json();
+		({ body, picture } = await readPlantRequest(request));
 	} catch {
-		return errorResponse('Invalid JSON payload', 400);
+		return errorResponse('Invalid request payload', 400);
 	}
 
 	const parsedBody = PlantEditValidator.safeParse(body);
@@ -109,9 +111,18 @@ async function postPlantEditRoute(
 	}
 
 	try {
-		const data = await editPlant(user, scope, plantId, parsedBody.data);
+		const pictureFileId = picture
+			? await savePlantPicture(picture)
+			: parsedBody.data.pictureFileId;
+		const data = await editPlant(user, scope, plantId, {
+			...parsedBody.data,
+			pictureFileId,
+		});
 		return successResponse('Plant updated successfully.', data);
 	} catch (error: unknown) {
+		if (error instanceof Error && !(error instanceof ApiError)) {
+			return errorResponse(error.message, 400);
+		}
 		if (error instanceof ApiError) {
 			return errorResponse(error.message, error.statusCode);
 		}
