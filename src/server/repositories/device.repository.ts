@@ -520,40 +520,55 @@ export class DeviceRepository {
   async getPlantDeviceList(params: DeviceListParams) {
     await this.getScopedPlantOrThrow(params.scope, params.plantId);
 
-    const [inverters, dataloggers] = await Promise.all([
-      this.dbClient.deviceInverter.findMany({
-        where: {
-          plantId: BigInt(params.plantId),
-          deletedAt: null,
-        },
-        select: {
-          id: true,
-          name: true,
-          type: true,
-          serialNumber: true,
-          updatedAt: true,
-          updateTime: true,
-          createdAt: true,
-        },
-      }),
+    // const [inverters, dataloggers] = await Promise.all([
+    //   this.dbClient.deviceInverter.findMany({
+    //     where: {
+    //       plantId: BigInt(params.plantId),
+    //       deletedAt: null,
+    //     },
+    //     select: {
+    //       id: true,
+    //       name: true,
+    //       type: true,
+    //       serialNumber: true,
+    //       updatedAt: true,
+    //       updateTime: true,
+    //       createdAt: true,
+    //     },
+    //   }),
 
-      this.dbClient.deviceDatalogger.findMany({
-        where: {
-          plantId: BigInt(params.plantId),
-          deletedAt: null,
-        },
-        select: {
-          id: true,
-          name: true,
-          type: true,
-          serialNumber: true,
-          online: true,
-          updatedAt: true,
-          updateTime: true,
-          createdAt: true,
-        },
-      }),
-    ]);
+    //   this.dbClient.deviceDatalogger.findMany({
+    //     where: {
+    //       plantId: BigInt(params.plantId),
+    //       deletedAt: null,
+    //     },
+    //     select: {
+    //       id: true,
+    //       name: true,
+    //       type: true,
+    //       serialNumber: true,
+    //       online: true,
+    //       updatedAt: true,
+    //       updateTime: true,
+    //       createdAt: true,
+    //     },
+    //   }),
+    // ]);
+    const inverters = await this.dbClient.deviceInverter.findMany({
+      where: {
+        plantId: BigInt(params.plantId),
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        serialNumber: true,
+        updatedAt: true,
+        updateTime: true,
+        createdAt: true,
+      },
+    });
 
     // Inverter serial numbers
     const serialNumbers = inverters
@@ -661,7 +676,7 @@ export class DeviceRepository {
     const rows = this.sortRows(
       [
         ...this.mapDeviceRows(enrichedInverters),
-        ...this.mapDeviceRows(dataloggers),
+        // ...this.mapDeviceRows(dataloggers),
       ],
       params.sortBy,
       params.sortOrder,
