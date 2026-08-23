@@ -68,7 +68,6 @@ async function getDeviceChartRoute(request: NextRequest, context: DeviceChartCon
 				: 'Device chart data fetched successfully.';
 
 		return successResponse(message, data);
-		return successResponse('success', []);
 	} catch (error: unknown) {
 		if (error instanceof ApiError) {
 			return errorResponse(error.message, error.statusCode);

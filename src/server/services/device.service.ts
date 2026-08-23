@@ -114,7 +114,7 @@ export interface DeviceLogsExportServiceParams {
 export class DeviceService {
   constructor(
     private readonly deviceRepository: DeviceRepository = new DeviceRepository(),
-  ) {}
+  ) { }
 
   private formatDateTime(value: Date | null | undefined): string {
     const date = value ?? new Date();
@@ -499,52 +499,68 @@ export class DeviceService {
       };
     }
 
+    const mpptCount = Number(log.mppt_no ?? 0);
+
+    const mpptStats = Array.from({ length: mpptCount }, (_, i) => {
+      const num = i + 1;
+
+      return {
+        key: `mppt${num}`,
+        label: `MPPT${num}`,
+        value: `${log[`dc_voltage_${num}`] ?? 0} V / ${log[`dc_current_${num}`] ?? 0
+          } A / ${Number(log[`dc_power_${num}`] ?? 0)} W`,
+      };
+    });
+
     const basicStats = [
-      {
-        key: "mppt1",
-        label: "MPPT1",
-        value: `${log.dc_voltage_1 ?? 0} V / ${log.dc_current_1 ?? 0} A / ${Number(log.dc_power_1 ?? 0)} kW`,
-      },
-      {
-        key: "mppt2",
-        label: "MPPT2",
-        value: `${log.dc_voltage_2 ?? 0} V / ${log.dc_current_2 ?? 0} A / ${Number(log.dc_power_2 ?? 0)} kW`,
-      },
-      {
-        key: "mppt3",
-        label: "MPPT3",
-        value: `${log.dc_voltage_3 ?? 0} V / ${log.dc_current_3 ?? 0} A / ${Number(log.dc_power_3 ?? 0)} kW`,
-      },
-      {
-        key: "mppt4",
-        label: "MPPT4",
-        value: `${log.dc_voltage_4 ?? 0} V / ${log.dc_current_4 ?? 0} A / ${Number(log.dc_power_4 ?? 0)} kW`,
-      },
-      {
-        key: "mppt5",
-        label: "MPPT5",
-        value: `${log.dc_voltage_5 ?? 0} V / ${log.dc_current_5 ?? 0} A / ${Number(log.dc_power_5 ?? 0)} kW`,
-      },
-      {
-        key: "mppt6",
-        label: "MPPT6",
-        value: `${log.dc_voltage_6 ?? 0} V / ${log.dc_current_6 ?? 0} A / ${Number(log.dc_power_6 ?? 0)} kW`,
-      },
-      {
-        key: "mppt7",
-        label: "MPPT7",
-        value: `${log.dc_voltage_7 ?? 0} V / ${log.dc_current_7 ?? 0} A / ${Number(log.dc_power_7 ?? 0)} kW`,
-      },
-      {
-        key: "mppt8",
-        label: "MPPT8",
-        value: `${log.dc_voltage_8 ?? 0} V / ${log.dc_current_8 ?? 0} A / ${Number(log.dc_power_8 ?? 0)} kW`,
-      },
-      {
-        key: "mppt9",
-        label: "MPPT9",
-        value: `${log.dc_voltage_9 ?? 0} V / ${log.dc_current_9 ?? 0} A / ${Number(log.dc_power_9 ?? 0)} kW`,
-      },
+      // {
+      //   key: "mppt1",
+      //   label: "MPPT1",
+      //   value: `${log.dc_voltage_1 ?? 0} V / ${log.dc_current_1 ?? 0} A / ${Number(log.dc_power_1 ?? 0)} W`,
+      // },
+      // {
+      //   key: "mppt2",
+      //   label: "MPPT2",
+      //   value: `${log.dc_voltage_2 ?? 0} V / ${log.dc_current_2 ?? 0} A / ${Number(log.dc_power_2 ?? 0)} W`,
+      // },
+      // {
+      //   key: "mppt3",
+      //   label: "MPPT3",
+      //   value: `${log.dc_voltage_3 ?? 0} V / ${log.dc_current_3 ?? 0} A / ${Number(log.dc_power_3 ?? 0)} W`,
+      // },
+      // {
+      //   key: "mppt4",
+      //   label: "MPPT4",
+      //   value: `${log.dc_voltage_4 ?? 0} V / ${log.dc_current_4 ?? 0} A / ${Number(log.dc_power_4 ?? 0)} W`,
+      // },
+      // {
+      //   key: "mppt5",
+      //   label: "MPPT5",
+      //   value: `${log.dc_voltage_5 ?? 0} V / ${log.dc_current_5 ?? 0} A / ${Number(log.dc_power_5 ?? 0)} W`,
+      // },
+      // {
+      //   key: "mppt6",
+      //   label: "MPPT6",
+      //   value: `${log.dc_voltage_6 ?? 0} V / ${log.dc_current_6 ?? 0} A / ${Number(log.dc_power_6 ?? 0)} W`,
+      // },
+      // {
+      //   key: "mppt7",
+      //   label: "MPPT7",
+      //   value: `${log.dc_voltage_7 ?? 0} V / ${log.dc_current_7 ?? 0} A / ${Number(log.dc_power_7 ?? 0)} W`,
+      // },
+      // {
+      //   key: "mppt8",
+      //   label: "MPPT8",
+      //   value: `${log.dc_voltage_8 ?? 0} V / ${log.dc_current_8 ?? 0} A / ${Number(log.dc_power_8 ?? 0)} W`,
+      // },
+      // {
+      //   key: "mppt9",
+      //   label: "MPPT9",
+      //   value: `${log.dc_voltage_9 ?? 0} V / ${log.dc_current_9 ?? 0} A / ${Number(log.dc_power_9 ?? 0)} W`,
+      // },
+
+      ...mpptStats,
+
       {
         key: "l1",
         label: "L1",
@@ -617,13 +633,23 @@ export class DeviceService {
       },
     ];
 
-    const stringStats = Array.from({ length: 9 }, (_, i) => ({
-      key: `string${i + 1}`,
-      label: `String${i + 1}`,
-      value: `${log[`dc_voltage_${i + 1}`] ?? 0} V / ${
-        log[`dc_current_${i + 1}`] ?? 0
-      } A`,
-    }));
+    // const stringStats = Array.from({ length: 9 }, (_, i) => ({
+    //   key: `string${i + 1}`,
+    //   label: `String${i + 1}`,
+    //   value: `${log[`dc_voltage_${i + 1}`] ?? 0} V / ${log[`dc_current_${i + 1}`] ?? 0
+    //     } A`,
+    // }));
+
+    const stringStats = Array.from({ length: mpptCount }, (_, i) => {
+      const num = i + 1;
+
+      return {
+        key: `string${num}`,
+        label: `String${num}`,
+        value: `${log[`dc_voltage_${num}`] ?? 0} V / ${log[`dc_current_${num}`] ?? 0
+          } A`,
+      };
+    });
 
     return {
       device: {
@@ -848,6 +874,43 @@ export class DeviceService {
     };
   }
 
+  // private createMonthPoints(
+  //   logs: Array<{
+  //     dayDate: Date;
+  //     dailyProduction: Decimal | null;
+  //     totalEnergy: Decimal | null;
+  //   }>,
+  // ) {
+  //   if (logs.length === 0) {
+  //     return [];
+  //   }
+
+  //   const firstDate = new Date(logs[0].dayDate);
+
+  //   const daysInMonth = new Date(
+  //     firstDate.getFullYear(),
+  //     firstDate.getMonth() + 1,
+  //     0,
+  //   ).getDate();
+
+  //   return Array.from(
+  //     {
+  //       length: daysInMonth,
+  //     },
+  //     (_, index) => {
+  //       const day = index + 1;
+
+  //       const row = logs.find((log) => new Date(log.dayDate).getDate() === day);
+
+  //       return {
+  //         date: String(day).padStart(2, "0"),
+
+  //         total: row?.dailyProduction ?? 0,
+  //       };
+  //     },
+  //   );
+  // }
+
   private createMonthPoints(
     logs: Array<{
       dayDate: Date;
@@ -861,33 +924,58 @@ export class DeviceService {
 
     const firstDate = new Date(logs[0].dayDate);
 
-    const daysInMonth = new Date(
-      firstDate.getFullYear(),
-      firstDate.getMonth() + 1,
-      0,
-    ).getDate();
+    const year = firstDate.getFullYear();
+    const month = firstDate.getMonth();
 
-    return Array.from(
-      {
-        length: daysInMonth,
-      },
-      (_, index) => {
-        const day = index + 1;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        const row = logs.find((log) => new Date(log.dayDate).getDate() === day);
+    const dailyMap = new Map<number, number>();
 
-        return {
-          date: String(day).padStart(2, "0"),
+    for (const log of logs) {
+      const day = new Date(log.dayDate).getDate();
 
-          total: row?.dailyProduction ?? 0,
-        };
-      },
-    );
+      dailyMap.set(day, Number(log.dailyProduction ?? 0));
+    }
+
+    return Array.from({ length: daysInMonth }, (_, index) => {
+      const day = index + 1;
+
+      return {
+        date: String(day).padStart(2, "0"),
+        total: Number((dailyMap.get(day) ?? 0).toFixed(2)),
+      };
+    });
   }
+
+  // private createYearPoints(
+  //   logs: Array<{
+  //     latestTimestamp: Date;
+  //     dailyProduction: Decimal | null;
+  //     totalEnergy: Decimal | null;
+  //   }>,
+  // ) {
+  //   const monthTotals = new Map<number, number>();
+
+  //   for (const log of logs) {
+  //     const month = log.latestTimestamp.getMonth();
+
+  //     const current = monthTotals.get(month) ?? 0;
+
+  //     monthTotals.set(month, current + Number(log.dailyProduction ?? 0));
+  //   }
+
+  //   return Array.from({ length: 12 }, (_, month) => ({
+  //     month: new Date(2000, month, 1).toLocaleString("en-IN", {
+  //       month: "short",
+  //     }),
+
+  //     total: Number((monthTotals.get(month) ?? 0).toFixed(2)),
+  //   }));
+  // }
 
   private createYearPoints(
     logs: Array<{
-      latestTimestamp: Date;
+      dayDate: Date;
       dailyProduction: Decimal | null;
       totalEnergy: Decimal | null;
     }>,
@@ -895,18 +983,20 @@ export class DeviceService {
     const monthTotals = new Map<number, number>();
 
     for (const log of logs) {
-      const month = log.latestTimestamp.getMonth();
+      const month = new Date(log.dayDate).getMonth();
 
       const current = monthTotals.get(month) ?? 0;
 
-      monthTotals.set(month, current + Number(log.dailyProduction ?? 0));
+      monthTotals.set(
+        month,
+        current + Number(log.dailyProduction ?? 0),
+      );
     }
 
     return Array.from({ length: 12 }, (_, month) => ({
       month: new Date(2000, month, 1).toLocaleString("en-IN", {
         month: "short",
       }),
-
       total: Number((monthTotals.get(month) ?? 0).toFixed(2)),
     }));
   }
@@ -944,7 +1034,7 @@ export class DeviceService {
       return {
         range: "day" as const,
         chartType: "area" as const,
-        unit: "kW" as const,
+        unit: "W" as const,
 
         period: {
           date: params.date,
