@@ -646,18 +646,18 @@ export class PlantRepository {
 
       const latestLogs = latestConditions.length
         ? await prisma.deviceLogsLatest.findMany({
-          where: {
-            OR: latestConditions,
-          },
+            where: {
+              OR: latestConditions,
+            },
 
-          select: {
-            currentPower: true,
-            dailyProduction: true,
-            totalEnergy: true,
-            totalHours: true,
-            latestTimestamp: true,
-          },
-        })
+            select: {
+              currentPower: true,
+              dailyProduction: true,
+              totalEnergy: true,
+              totalHours: true,
+              latestTimestamp: true,
+            },
+          })
         : [];
 
       aggregates = latestLogs.reduce<{
@@ -715,23 +715,23 @@ export class PlantRepository {
 
         currentStatus: plantStatus
           ? {
-            status: plantStatus.status,
-            totalDevices: plantStatus.totalDevices,
-            normalCount: plantStatus.normalCount,
-            abnormalCount: plantStatus.abnormalCount,
-            standbyCount: plantStatus.standbyCount,
-            offlineCount: plantStatus.offlineCount,
-            updatedAt: plantStatus.updatedAt,
-          }
+              status: plantStatus.status,
+              totalDevices: plantStatus.totalDevices,
+              normalCount: plantStatus.normalCount,
+              abnormalCount: plantStatus.abnormalCount,
+              standbyCount: plantStatus.standbyCount,
+              offlineCount: plantStatus.offlineCount,
+              updatedAt: plantStatus.updatedAt,
+            }
           : {
-            status: PlantStatus.Offline,
-            totalDevices: 0,
-            normalCount: 0,
-            abnormalCount: 0,
-            standbyCount: 0,
-            offlineCount: 0,
-            updatedAt: null,
-          },
+              status: PlantStatus.Offline,
+              totalDevices: 0,
+              normalCount: 0,
+              abnormalCount: 0,
+              standbyCount: 0,
+              offlineCount: 0,
+              updatedAt: null,
+            },
 
         installationDate: plant.installed
           ? plant.installed.toISOString().slice(0, 10)
@@ -2220,8 +2220,9 @@ export class PlantRepository {
     return {
       fileName: "plant-list.csv",
 
-      downloadUrl: `/api/v1/monitor/plants/list/export/files/plant-list.csv${query.toString() ? `?${query.toString()}` : ""
-        }`,
+      downloadUrl: `/api/v1/monitor/plants/list/export/files/plant-list.csv${
+        query.toString() ? `?${query.toString()}` : ""
+      }`,
 
       expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
 
