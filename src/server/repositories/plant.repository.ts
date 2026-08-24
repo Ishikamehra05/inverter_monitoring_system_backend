@@ -1148,14 +1148,18 @@ export class PlantRepository {
     /* ---------------- DAY ---------------- */
 
     if (params.range === "day") {
+      const startDate = new Date(`${params.date}T00:00:00.000Z`);
+      const endDate = new Date(`${params.date}T00:00:00.000Z`);
+      endDate.setUTCDate(endDate.getUTCDate() + 1);
+
       const logs = await prisma.deviceLogs.findMany({
         where: {
           sno: {
             in: serialNumbers,
           },
           timestamp: {
-            gte: new Date(`${params.date}T00:00:00`),
-            lte: new Date(`${params.date}T23:59:59.999`),
+            gte: startDate,
+            lt: endDate,
           },
         },
         orderBy: {
@@ -1412,16 +1416,16 @@ export class PlantRepository {
       throw new ApiError(400, "No valid analysis parameters selected");
     }
 
-    const startDate = new Date(`${params.date}T00:00:00`);
-
-    const endDate = new Date(`${params.date}T23:59:59.999`);
+    const startDate = new Date(`${params.date}T00:00:00.000Z`);
+    const endDate = new Date(`${params.date}T00:00:00.000Z`);
+    endDate.setUTCDate(endDate.getUTCDate() + 1);
 
     const logs = await prisma.deviceLogs.findMany({
       where: {
         sno: device.serialNumber,
         timestamp: {
           gte: startDate,
-          lte: endDate,
+          lt: endDate,
         },
       },
       orderBy: {
