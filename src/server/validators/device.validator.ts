@@ -63,7 +63,7 @@ export const DeviceChartQueryValidator = z.object({
 });
 
 export const DeviceChartExportQueryValidator = DeviceChartQueryValidator.extend({
-	format: z.enum(['csv']).default('csv'),
+	format: z.enum(['xlsx', 'csv']).default('xlsx'),
 });
 
 export const DeviceCurrentAlertsQueryValidator = z.object({

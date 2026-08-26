@@ -19,6 +19,7 @@ import { resolveUserScope } from "@/server/utils/scope-resolver";
 import { UserRepository } from "@/server/repositories/user.repository";
 import { Decimal } from "@prisma/client/runtime/client";
 import { POWER_UNIT } from "../../../constants";
+import ExcelJS from "exceljs";
 
 export interface DeviceChartServiceParams {
   user: User;
@@ -33,7 +34,7 @@ export interface DeviceChartServiceParams {
 }
 
 export interface DeviceChartExportServiceParams extends DeviceChartServiceParams {
-  format: "csv";
+  format: "xlsx" | "csv";
 }
 
 export interface DeviceCurrentAlertsServiceParams {
@@ -114,7 +115,7 @@ export interface DeviceLogsExportServiceParams {
 export class DeviceService {
   constructor(
     private readonly deviceRepository: DeviceRepository = new DeviceRepository(),
-  ) { }
+  ) {}
 
   private formatDateTime(value: Date | null | undefined): string {
     const date = value ?? new Date();
@@ -507,8 +508,9 @@ export class DeviceService {
       return {
         key: `mppt${num}`,
         label: `MPPT${num}`,
-        value: `${log[`dc_voltage_${num}`] ?? 0} V / ${log[`dc_current_${num}`] ?? 0
-          } A / ${Number(log[`dc_power_${num}`] ?? 0)} W`,
+        value: `${log[`dc_voltage_${num}`] ?? 0} V / ${
+          log[`dc_current_${num}`] ?? 0
+        } A / ${Number(log[`dc_power_${num}`] ?? 0)} W`,
       };
     });
 
@@ -646,8 +648,9 @@ export class DeviceService {
       return {
         key: `string${num}`,
         label: `String${num}`,
-        value: `${log[`dc_voltage_${num}`] ?? 0} V / ${log[`dc_current_${num}`] ?? 0
-          } A`,
+        value: `${log[`dc_voltage_${num}`] ?? 0} V / ${
+          log[`dc_current_${num}`] ?? 0
+        } A`,
       };
     });
 
@@ -987,10 +990,7 @@ export class DeviceService {
 
       const current = monthTotals.get(month) ?? 0;
 
-      monthTotals.set(
-        month,
-        current + Number(log.dailyProduction ?? 0),
-      );
+      monthTotals.set(month, current + Number(log.dailyProduction ?? 0));
     }
 
     return Array.from({ length: 12 }, (_, month) => ({
@@ -1166,39 +1166,180 @@ export class DeviceService {
 
   async exportDeviceChart(params: DeviceChartExportServiceParams) {
     const chart = await this.getDeviceChart(params);
+    const account = params.user?.account ?? "";
+    const deviceType =
+      chart.device?.type ?? chart.device?.sn ?? params.deviceId;
 
-    let headers: string[];
+    if (params.format === "csv") {
+      const headers = ["Date", "Power(W)"];
+      const rows = chart.points as Array<
+        Record<string, string | number | null | undefined>
+      >;
+      const lines = [
+        `"Account","${account.replace(/"/g, '""')}"`,
+        `"Type","${String(deviceType).replace(/"/g, '""')}"`,
+        headers.join(","),
+      ];
 
-    switch (params.range) {
-      case "day":
-        headers = ["time", "total"];
-        break;
+      for (const point of rows) {
+        const dateValue =
+          params.range === "day"
+            ? point.time
+            : params.range === "month"
+              ? point.date
+              : point.month;
+        const safeDateValue = dateValue ?? "";
+        const totalValue = point.total ?? 0;
+        lines.push(
+          `"${String(safeDateValue).replace(/"/g, '""')}","${Number(totalValue).toFixed(0)}"`,
+        );
+      }
 
-      case "month":
-        headers = ["date", "total"];
-        break;
+      const csv = lines.join("\n");
+      const fileName = `device-chart-${params.deviceId}-${params.date}-${params.range}.csv`;
 
-      case "year":
-        headers = ["month", "total"];
-        break;
-
-      default:
-        headers = ["total"];
+      return {
+        fileName,
+        buffer: Buffer.from(csv, "utf-8"),
+        contentType: "text/csv; charset=utf-8",
+        downloadUrl: `/api/v1/monitor/devices/${params.deviceId}/chart/export/files/${fileName}`,
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+      };
     }
 
-    const rows = [headers.join(",")];
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "Solar Monitoring System";
+    workbook.created = new Date();
+    workbook.modified = new Date();
 
-    for (const point of chart.points as Array<
-      Record<string, string | number>
-    >) {
-      rows.push(headers.map((header) => String(point[header] ?? "")).join(","));
+    const worksheet = workbook.addWorksheet("Chart", {
+      views: [{ showGridLines: false }],
+    });
+
+    worksheet.getCell("A1").value = "Account";
+    worksheet.getCell("B1").value = account;
+
+    worksheet.getCell("A2").value = "Type";
+    worksheet.getCell("B2").value = deviceType;
+
+    worksheet.getCell("A3").value = "Date";
+    worksheet.getCell("B3").value = "Power(KW)";
+
+    const labelStyle: Partial<ExcelJS.Style> = {
+      font: { bold: true, size: 11 },
+      alignment: { vertical: "middle", horizontal: "left" },
+    };
+
+    const headerStyle: Partial<ExcelJS.Style> = {
+      font: { bold: true, size: 10 },
+      alignment: { vertical: "middle", horizontal: "center" },
+      border: {
+        top: { style: "thin" },
+        bottom: { style: "thin" },
+        left: { style: "thin" },
+        right: { style: "thin" },
+      },
+    };
+
+    const dataStyle: Partial<ExcelJS.Style> = {
+      alignment: { vertical: "middle", horizontal: "center" },
+      border: {
+        top: { style: "thin" },
+        bottom: { style: "thin" },
+        left: { style: "thin" },
+        right: { style: "thin" },
+      },
+    };
+
+    worksheet.getCell("A1").style = labelStyle;
+    worksheet.getCell("B1").style = labelStyle;
+    worksheet.getCell("A2").style = labelStyle;
+    worksheet.getCell("B2").style = labelStyle;
+    worksheet.getCell("A3").style = headerStyle;
+    worksheet.getCell("B3").style = headerStyle;
+
+    const points = chart.points as Array<
+      Record<string, string | number | null | undefined>
+    >;
+    let rowNumber = 4;
+    const dateKey =
+      params.range === "day"
+        ? "time"
+        : params.range === "month"
+          ? "date"
+          : "month";
+
+    for (const point of points) {
+      const dateValue = point[dateKey];
+      const dateCell = worksheet.getCell(rowNumber, 1);
+      const totalCell = worksheet.getCell(rowNumber, 2);
+
+      if (dateValue !== null && dateValue !== undefined && dateValue !== "") {
+        if (params.range === "day") {
+          const parsedDate = new Date(String(dateValue));
+          dateCell.value = Number.isNaN(parsedDate.getTime())
+            ? String(dateValue)
+            : parsedDate;
+          dateCell.numFmt = "yyyy-mm-dd hh:mm:ss";
+        } else if (params.range === "month") {
+          const parsedDate = new Date(String(dateValue));
+          dateCell.value = Number.isNaN(parsedDate.getTime())
+            ? String(dateValue)
+            : parsedDate;
+          dateCell.numFmt = "yyyy-mm-dd";
+        } else {
+          dateCell.value = String(dateValue);
+        }
+      } else {
+        dateCell.value = "";
+      }
+
+      const totalValue = point.total;
+      if (
+        totalValue === null ||
+        totalValue === undefined ||
+        totalValue === ""
+      ) {
+        totalCell.value = 0;
+      } else {
+        const numericValue = Number(totalValue);
+        totalCell.value = Number.isNaN(numericValue)
+          ? String(totalValue)
+          : numericValue;
+      }
+
+      totalCell.numFmt = "0";
+      dateCell.style = dataStyle;
+      totalCell.style = dataStyle;
+      rowNumber += 1;
     }
+
+    worksheet.getColumn("A").width = 20;
+    worksheet.getColumn("B").width = 20;
+    worksheet.getRow(1).height = 22;
+    worksheet.getRow(2).height = 22;
+    worksheet.getRow(3).height = 25;
+    worksheet.views = [{ state: "frozen", ySplit: 3, showGridLines: false }];
+    worksheet.autoFilter = { from: "A3", to: "B3" };
+    worksheet.pageSetup = {
+      orientation: "portrait",
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      paperSize: 9,
+    };
+    worksheet.pageSetup.printTitlesRow = "1:3";
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const fileName = `device-chart-${params.deviceId}-${params.date}-${params.range}.xlsx`;
 
     return {
-      fileName: `device-chart-${params.deviceId}-${params.date}-${params.range}.csv`,
-      downloadUrl: `/api/v1/monitor/devices/${params.deviceId}/chart/export/files/device-chart-${params.deviceId}-${params.date}-${params.range}.csv`,
+      fileName,
+      buffer,
+      contentType:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      downloadUrl: `/api/v1/monitor/devices/${params.deviceId}/chart/export/files/${fileName}`,
       expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-      csv: rows.join("\n"),
     };
   }
 
