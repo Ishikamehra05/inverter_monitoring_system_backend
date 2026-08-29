@@ -1397,9 +1397,11 @@ export class DeviceRepository {
     const [year, month, day] = params.date.split("-").map(Number);
 
     // Convert IST day boundaries to UTC
-    const start = new Date(Date.UTC(year, month - 1, day, -5, -30, 0));
+    // const start = new Date(Date.UTC(year, month - 1, day, -5, -30, 0));
 
-    const end = new Date(Date.UTC(year, month - 1, day + 1, -5, -30, 0));
+    // const end = new Date(Date.UTC(year, month - 1, day + 1, -5, -30, 0));
+    const start = new Date(Date.UTC(year, month - 1, day));
+    const end = new Date(Date.UTC(year, month - 1, day + 1));
 
     return this.dbClient.deviceLogs.findMany({
       where: {
