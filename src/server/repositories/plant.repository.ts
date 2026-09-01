@@ -695,18 +695,18 @@ export class PlantRepository {
 
       const latestLogs = latestConditions.length
         ? await prisma.deviceLogsLatest.findMany({
-          where: {
-            OR: latestConditions,
-          },
+            where: {
+              OR: latestConditions,
+            },
 
-          select: {
-            currentPower: true,
-            dailyProduction: true,
-            totalEnergy: true,
-            totalHours: true,
-            latestTimestamp: true,
-          },
-        })
+            select: {
+              currentPower: true,
+              dailyProduction: true,
+              totalEnergy: true,
+              totalHours: true,
+              latestTimestamp: true,
+            },
+          })
         : [];
 
       aggregates = latestLogs.reduce<{
@@ -764,23 +764,23 @@ export class PlantRepository {
 
         currentStatus: plantStatus
           ? {
-            status: plantStatus.status,
-            totalDevices: plantStatus.totalDevices,
-            normalCount: plantStatus.normalCount,
-            abnormalCount: plantStatus.abnormalCount,
-            standbyCount: plantStatus.standbyCount,
-            offlineCount: plantStatus.offlineCount,
-            updatedAt: plantStatus.updatedAt,
-          }
+              status: plantStatus.status,
+              totalDevices: plantStatus.totalDevices,
+              normalCount: plantStatus.normalCount,
+              abnormalCount: plantStatus.abnormalCount,
+              standbyCount: plantStatus.standbyCount,
+              offlineCount: plantStatus.offlineCount,
+              updatedAt: plantStatus.updatedAt,
+            }
           : {
-            status: PlantStatus.Offline,
-            totalDevices: 0,
-            normalCount: 0,
-            abnormalCount: 0,
-            standbyCount: 0,
-            offlineCount: 0,
-            updatedAt: null,
-          },
+              status: PlantStatus.Offline,
+              totalDevices: 0,
+              normalCount: 0,
+              abnormalCount: 0,
+              standbyCount: 0,
+              offlineCount: 0,
+              updatedAt: null,
+            },
 
         installationDate: plant.installed
           ? plant.installed.toISOString().slice(0, 10)
@@ -1492,6 +1492,10 @@ export class PlantRepository {
     /* ---------------- DAY ---------------- */
 
     if (params.range === "day") {
+      const startDate = new Date(`${params.date}T00:00:00.000Z`);
+      const endDate = new Date(`${params.date}T00:00:00.000Z`);
+      endDate.setUTCDate(endDate.getUTCDate() + 1);
+
       const logs = await prisma.deviceLogs.findMany({
         where: {
           sno: {
@@ -1670,15 +1674,24 @@ export class PlantRepository {
 
   async exportPlantChart(params: PlantChartExportParams) {
     const chart = await this.getPlantChart(params);
+    const plant = await this.getScopedPlantOrThrow(params.scope, params.plantId);
     const fileName = "plant-chart.csv";
 
     const headers = ["time", ...chart.series.map((item) => item.key)];
-    const rows = [headers.join(",")];
+    const csvEscape = (value: unknown) => {
+      const text = String(value ?? "");
+      return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    };
+    const rows = [
+      ["Account", plant.userAccount].map(csvEscape).join(","),
+      ["Plant Name", plant.name].map(csvEscape).join(","),
+      headers.map(csvEscape).join(","),
+    ];
 
     for (const point of chart.points as Array<
       Record<string, string | number>
     >) {
-      rows.push(headers.map((header) => String(point[header] ?? "")).join(","));
+      rows.push(headers.map((header) => csvEscape(point[header])).join(","));
     }
 
     const query = new URLSearchParams({
@@ -1759,13 +1772,16 @@ export class PlantRepository {
     const startDate = new Date(`${params.date}T00:00:00.000Z`);
     const endDate = new Date(`${params.date}T00:00:00.000Z`);
     endDate.setUTCDate(endDate.getUTCDate() + 1);
+    const startDate = new Date(`${params.date}T00:00:00.000Z`);
+    const endDate = new Date(`${params.date}T00:00:00.000Z`);
+    endDate.setUTCDate(endDate.getUTCDate() + 1);
 
     const logs = await prisma.deviceLogs.findMany({
       where: {
         sno: device.serialNumber,
         timestamp: {
           gte: startDate,
-          lte: endDate,
+          lt: endDate,
         },
       },
       orderBy: {
@@ -2562,8 +2578,9 @@ export class PlantRepository {
     return {
       fileName: "plant-list.csv",
 
-      downloadUrl: `/api/v1/monitor/plants/list/export/files/plant-list.csv${query.toString() ? `?${query.toString()}` : ""
-        }`,
+      downloadUrl: `/api/v1/monitor/plants/list/export/files/plant-list.csv${
+        query.toString() ? `?${query.toString()}` : ""
+      }`,
 
       expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
 

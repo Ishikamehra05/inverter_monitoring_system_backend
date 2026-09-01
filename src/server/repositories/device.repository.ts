@@ -125,6 +125,11 @@ export interface DeviceInformationSnapshotParams {
   deviceId: string;
 }
 
+export interface DeviceInformationExportSnapshotParams extends DeviceInformationSnapshotParams {
+  dateFrom?: string;
+  dateTo?: string;
+}
+
 export interface DeviceInformationSnapshot {
   plantId: bigint;
   plantAccount: string;
@@ -149,6 +154,7 @@ type DeviceRow = {
   name: string;
   type: string;
   sn: string;
+  macAddress?: string | null;
   power: { value: number; unit: typeof POWER_UNIT };
   today: { value: number; unit: "kWh" };
   total: { value: number; unit: "kWh" };
@@ -158,7 +164,7 @@ type DeviceRow = {
 };
 
 export class DeviceRepository {
-  constructor(private readonly dbClient: PrismaClient = prisma) { }
+  constructor(private readonly dbClient: PrismaClient = prisma) {}
 
   private formatDateTime(value: Date | null | undefined): string {
     const date = value ?? new Date();
@@ -232,6 +238,7 @@ export class DeviceRepository {
       name: device.name ?? `${device.type} ${device.serialNumber}`,
       type: device.type,
       sn: device.serialNumber,
+      macAddress: device.macAddress ?? null,
       power: {
         value: Number((device.powerValue ?? 0).toFixed(2)),
         unit: POWER_UNIT,
@@ -602,42 +609,47 @@ export class DeviceRepository {
     const latestLogs =
       latestConditions.length > 0
         ? await this.dbClient.deviceLogsLatest.findMany({
-          where: {
-            OR: latestConditions,
-          },
+            where: {
+              OR: latestConditions,
+            },
 
-          select: {
-            sno: true,
-            currentPower: true,
-            dailyProduction: true,
-            totalEnergy: true,
-            totalHours: true,
-            latestTimestamp: true,
-            macAddress: true,
-          },
-        })
+            select: {
+              sno: true,
+              currentPower: true,
+              dailyProduction: true,
+              totalEnergy: true,
+              totalHours: true,
+              latestTimestamp: true,
+
+              sourceLog: {
+                select: {
+                  mac_address: true,
+                },
+              },
+            },
+          })
         : [];
 
     // Get MAC addresses from latest logs
     const macAddresses = latestLogs
-      .map((log) => log.macAddress)
+      .map((log) => log.sourceLog?.mac_address)
       .filter((mac): mac is string => !!mac);
 
     // Get connection status using MAC address
     const connectionStatuses =
       macAddresses.length > 0
         ? await this.dbClient.deviceConnectionStatus.findMany({
-          where: {
-            macAddress: {
-              in: macAddresses,
+            where: {
+              macAddress: {
+                in: macAddresses,
+              },
             },
-          },
 
-          select: {
-            macAddress: true,
-            status: true,
-          },
-        })
+            select: {
+              macAddress: true,
+              status: true,
+            },
+          })
         : [];
 
     // Latest log by inverter serial number
@@ -651,10 +663,10 @@ export class DeviceRepository {
     // Add latest data + connection status to inverters
     const enrichedInverters = inverters.map((inverter) => {
       const latest = latestMap.get(inverter.serialNumber);
-
+      const macAddress = latest?.sourceLog?.mac_address ?? null;
       return {
         ...inverter,
-
+        macAddress,
         updatedAt:
           latest?.latestTimestamp ?? inverter.updateTime ?? inverter.updatedAt,
 
@@ -666,8 +678,8 @@ export class DeviceRepository {
 
         hTotalValue: latest?.totalHours ?? 0,
 
-        status: latest?.macAddress
-          ? (statusMap.get(latest.macAddress) ?? "offline")
+        status: latest?.sourceLog?.mac_address
+          ? (statusMap.get(latest.sourceLog.mac_address) ?? "offline")
           : "offline",
       };
     });
@@ -1895,6 +1907,37 @@ export class DeviceRepository {
       latestSummary,
     };
   }
+
+  async getDeviceInformationExportSnapshot(
+    params: DeviceInformationExportSnapshotParams,
+  ) {
+    const snapshot = await this.getDeviceInformationRealtimeSnapshot(params);
+
+    if (!snapshot) {
+      return null;
+    }
+
+    return {
+      ...snapshot,
+      logs: await this.dbClient.deviceLogs.findMany({
+        where: {
+          sno: snapshot.device.serialNumber,
+          timestamp: {
+            gte: params.dateFrom
+              ? new Date(`${params.dateFrom}T00:00:00.000Z`)
+              : undefined,
+            lte: params.dateTo
+              ? new Date(`${params.dateTo}T23:59:59.999Z`)
+              : undefined,
+          },
+        },
+        orderBy: {
+          timestamp: "asc",
+        },
+      }),
+    };
+  }
+
   async getDeviceInformationSnapshot(
     params: DeviceInformationSnapshotParams,
   ): Promise<DeviceInformationSnapshot> {
@@ -1948,20 +1991,20 @@ export class DeviceRepository {
     if (inverter) {
       const latestLog = inverter.serialNumber
         ? await this.dbClient.deviceLogsLatest.findFirst({
-          where: {
-            sno: inverter.serialNumber,
-          },
-          orderBy: {
-            latestTimestamp: "desc",
-          },
-          select: {
-            currentPower: true,
-            dailyProduction: true,
-            totalEnergy: true,
-            totalHours: true,
-            latestTimestamp: true,
-          },
-        })
+            where: {
+              sno: inverter.serialNumber,
+            },
+            orderBy: {
+              latestTimestamp: "desc",
+            },
+            select: {
+              currentPower: true,
+              dailyProduction: true,
+              totalEnergy: true,
+              totalHours: true,
+              latestTimestamp: true,
+            },
+          })
         : null;
 
       return {
@@ -2213,18 +2256,18 @@ export class DeviceRepository {
         : { plant: { userAccount: { in: params.scope }, deletedAt: null } }),
       ...(params.search
         ? {
-          OR: [
-            {
-              name: { contains: params.search, mode: "insensitive" as const },
-            },
-            {
-              serialNumber: {
-                contains: params.search,
-                mode: "insensitive" as const,
+            OR: [
+              {
+                name: { contains: params.search, mode: "insensitive" as const },
               },
-            },
-          ],
-        }
+              {
+                serialNumber: {
+                  contains: params.search,
+                  mode: "insensitive" as const,
+                },
+              },
+            ],
+          }
         : {}),
     };
 

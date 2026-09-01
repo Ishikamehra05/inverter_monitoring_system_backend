@@ -119,7 +119,6 @@ async function getPlantChartExportRoute(
 			downloadUrl: data.downloadUrl,
 			expiresAt: data.expiresAt,
 		});
-		// return successResponse('success', [])
 	} catch (error: unknown) {
 		if (error instanceof ApiError) {
 			return errorResponse(error.message, error.statusCode);
