@@ -1772,9 +1772,6 @@ export class PlantRepository {
     const startDate = new Date(`${params.date}T00:00:00.000Z`);
     const endDate = new Date(`${params.date}T00:00:00.000Z`);
     endDate.setUTCDate(endDate.getUTCDate() + 1);
-    const startDate = new Date(`${params.date}T00:00:00.000Z`);
-    const endDate = new Date(`${params.date}T00:00:00.000Z`);
-    endDate.setUTCDate(endDate.getUTCDate() + 1);
 
     const logs = await prisma.deviceLogs.findMany({
       where: {
