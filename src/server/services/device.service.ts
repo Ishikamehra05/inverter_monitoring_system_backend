@@ -115,7 +115,7 @@ export interface DeviceLogsExportServiceParams {
 export class DeviceService {
   constructor(
     private readonly deviceRepository: DeviceRepository = new DeviceRepository(),
-  ) {}
+  ) { }
 
   private formatDateTime(value: Date | null | undefined): string {
     const date = value ?? new Date();
@@ -508,9 +508,8 @@ export class DeviceService {
       return {
         key: `mppt${num}`,
         label: `MPPT${num}`,
-        value: `${log[`dc_voltage_${num}`] ?? 0} V / ${
-          log[`dc_current_${num}`] ?? 0
-        } A / ${Number(log[`dc_power_${num}`] ?? 0)} W`,
+        value: `${log[`dc_voltage_${num}`] ?? 0} V / ${log[`dc_current_${num}`] ?? 0
+          } A / ${Number(log[`dc_power_${num}`] ?? 0)} W`,
       };
     });
 
@@ -594,6 +593,11 @@ export class DeviceService {
         value: String(log.signal_strength ?? 0),
       },
       {
+        key: "routerSsid",
+        label: "Router SSID",
+        value: log.router_ssid ?? "-",
+      },
+      {
         key: "communicationModuleStatus",
         label: "Communication Module Status",
         value: log.logger_status ?? "-",
@@ -648,9 +652,8 @@ export class DeviceService {
       return {
         key: `string${num}`,
         label: `String${num}`,
-        value: `${log[`dc_voltage_${num}`] ?? 0} V / ${
-          log[`dc_current_${num}`] ?? 0
-        } A`,
+        value: `${log[`dc_voltage_${num}`] ?? 0} V / ${log[`dc_current_${num}`] ?? 0
+          } A`,
       };
     });
 
@@ -1571,11 +1574,10 @@ export class DeviceService {
         return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
       };
       const csv = rows.map((row) => row.map(csvEscape).join(",")).join("\r\n");
-      const fileName = `device-information-${params.deviceId}${
-        params.dateFrom && params.dateTo
+      const fileName = `device-information-${params.deviceId}${params.dateFrom && params.dateTo
           ? `-${params.dateFrom}-to-${params.dateTo}`
           : "-all-data"
-      }.csv`;
+        }.csv`;
 
       return {
         fileName,
@@ -1654,16 +1656,14 @@ export class DeviceService {
     const buffer = await workbook.xlsx.writeBuffer();
 
     return {
-      fileName: `device-information-${params.deviceId}${
-        params.dateFrom && params.dateTo
+      fileName: `device-information-${params.deviceId}${params.dateFrom && params.dateTo
           ? `-${params.dateFrom}-to-${params.dateTo}`
           : "-all-data"
-      }.xlsx`,
-      downloadUrl: `/api/v1/monitor/devices/${params.deviceId}/information/export/files/device-information-${params.deviceId}${
-        params.dateFrom && params.dateTo
+        }.xlsx`,
+      downloadUrl: `/api/v1/monitor/devices/${params.deviceId}/information/export/files/device-information-${params.deviceId}${params.dateFrom && params.dateTo
           ? `-${params.dateFrom}-to-${params.dateTo}`
           : "-all-data"
-      }.xlsx`,
+        }.xlsx`,
       expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
       buffer,
       contentType:
