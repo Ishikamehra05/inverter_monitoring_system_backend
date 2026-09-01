@@ -125,6 +125,11 @@ export interface DeviceInformationSnapshotParams {
   deviceId: string;
 }
 
+export interface DeviceInformationExportSnapshotParams extends DeviceInformationSnapshotParams {
+  dateFrom?: string;
+  dateTo?: string;
+}
+
 export interface DeviceInformationSnapshot {
   plantId: bigint;
   plantAccount: string;
@@ -149,6 +154,7 @@ type DeviceRow = {
   name: string;
   type: string;
   sn: string;
+  macAddress?: string | null;
   power: { value: number; unit: typeof POWER_UNIT };
   today: { value: number; unit: "kWh" };
   total: { value: number; unit: "kWh" };
@@ -232,6 +238,7 @@ export class DeviceRepository {
       name: device.name ?? `${device.type} ${device.serialNumber}`,
       type: device.type,
       sn: device.serialNumber,
+      macAddress: device.macAddress ?? null,
       power: {
         value: Number((device.powerValue ?? 0).toFixed(2)),
         unit: POWER_UNIT,
@@ -613,14 +620,19 @@ export class DeviceRepository {
               totalEnergy: true,
               totalHours: true,
               latestTimestamp: true,
-              macAddress: true,
+
+              sourceLog: {
+                select: {
+                  mac_address: true,
+                },
+              },
             },
           })
         : [];
 
     // Get MAC addresses from latest logs
     const macAddresses = latestLogs
-      .map((log) => log.macAddress)
+      .map((log) => log.sourceLog?.mac_address)
       .filter((mac): mac is string => !!mac);
 
     // Get connection status using MAC address
@@ -651,10 +663,10 @@ export class DeviceRepository {
     // Add latest data + connection status to inverters
     const enrichedInverters = inverters.map((inverter) => {
       const latest = latestMap.get(inverter.serialNumber);
-
+      const macAddress = latest?.sourceLog?.mac_address ?? null;
       return {
         ...inverter,
-
+        macAddress,
         updatedAt:
           latest?.latestTimestamp ?? inverter.updateTime ?? inverter.updatedAt,
 
@@ -666,8 +678,8 @@ export class DeviceRepository {
 
         hTotalValue: latest?.totalHours ?? 0,
 
-        status: latest?.macAddress
-          ? (statusMap.get(latest.macAddress) ?? "offline")
+        status: latest?.sourceLog?.mac_address
+          ? (statusMap.get(latest.sourceLog.mac_address) ?? "offline")
           : "offline",
       };
     });
@@ -1891,6 +1903,37 @@ export class DeviceRepository {
       latestSummary,
     };
   }
+
+  async getDeviceInformationExportSnapshot(
+    params: DeviceInformationExportSnapshotParams,
+  ) {
+    const snapshot = await this.getDeviceInformationRealtimeSnapshot(params);
+
+    if (!snapshot) {
+      return null;
+    }
+
+    return {
+      ...snapshot,
+      logs: await this.dbClient.deviceLogs.findMany({
+        where: {
+          sno: snapshot.device.serialNumber,
+          timestamp: {
+            gte: params.dateFrom
+              ? new Date(`${params.dateFrom}T00:00:00.000Z`)
+              : undefined,
+            lte: params.dateTo
+              ? new Date(`${params.dateTo}T23:59:59.999Z`)
+              : undefined,
+          },
+        },
+        orderBy: {
+          timestamp: "asc",
+        },
+      }),
+    };
+  }
+
   async getDeviceInformationSnapshot(
     params: DeviceInformationSnapshotParams,
   ): Promise<DeviceInformationSnapshot> {

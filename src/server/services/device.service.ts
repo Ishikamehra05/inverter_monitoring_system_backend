@@ -74,9 +74,9 @@ export interface DeviceInformationExportServiceParams {
   user: User;
   plantId: string;
   deviceId: string;
-  dateFrom: string;
-  dateTo: string;
-  format: "csv";
+  dateFrom?: string;
+  dateTo?: string;
+  format: "xlsx" | "csv";
   fromService?: boolean;
   targetEndUserId?: string;
 }
@@ -590,7 +590,7 @@ export class DeviceService {
       },
       {
         key: "signal",
-        label: "Signal",
+        label: "Signal Strength",
         value: String(log.signal_strength ?? 0),
       },
       {
@@ -1485,21 +1485,189 @@ export class DeviceService {
   // }
 
   async exportDeviceInformation(params: DeviceInformationExportServiceParams) {
-    const information = await this.getDeviceInformation(params);
+    this.validateDateRange(params.dateFrom, params.dateTo);
 
-    const rows = ["section,key,label,value"];
-    for (const item of information.basicStats) {
-      rows.push(`basic,${item.key},${item.label},${item.value}`);
+    const snapshot =
+      await this.deviceRepository.getDeviceInformationExportSnapshot({
+        plantId: params.plantId,
+        deviceId: params.deviceId,
+        dateFrom: params.dateFrom,
+        dateTo: params.dateTo,
+      });
+
+    if (!snapshot) {
+      throw new ApiError(404, "Device not found for this plant.");
     }
-    for (const item of information.stringStats) {
-      rows.push(`string,${item.key},${item.label},${item.value}`);
+
+    const scope = await this.resolveScope(
+      params.user,
+      params.fromService,
+      params.targetEndUserId,
+      snapshot.plantAccount,
+    );
+    this.assertPlantAccess(scope, snapshot.plantAccount);
+
+    const mpptCount = Math.min(
+      9,
+      Math.max(
+        Number(snapshot.log?.mppt_no ?? 0),
+        ...snapshot.logs.map((log) => Number(log.mppt_no ?? 0)),
+      ),
+    );
+    const latestLog = snapshot.log ?? snapshot.logs.at(-1);
+    const latestInformation = this.toDeviceInformationData(snapshot);
+    const generalInformation = latestInformation.basicStats.filter(
+      (item) => item.label !== "Model" && item.label !== "Serial Number",
+    );
+    const model = latestLog?.device_model ?? snapshot.device.type;
+    const basicInformation = [
+      [
+        "Account",
+        "SN",
+        "Model",
+        ...generalInformation.map((item) => item.label),
+      ],
+      [
+        snapshot.plantAccount,
+        snapshot.device.serialNumber,
+        model,
+        ...generalInformation.map((item) => item.value),
+      ],
+    ];
+    const stringInformation = [
+      [
+        "String Information",
+        ...latestInformation.stringStats.map((item) => item.label),
+      ],
+      ["Value", ...latestInformation.stringStats.map((item) => item.value)],
+    ];
+    const rows: string[][] = [
+      [...basicInformation[0]],
+      [...basicInformation[1]],
+      [],
+      ...stringInformation,
+      [],
+      // [
+      //   "Time",
+      //   ...Array.from({ length: mpptCount }, (_, index) => `MPPT${index + 1}`),
+      // ],
+    ];
+
+    for (const log of snapshot.logs) {
+      const logValues = log as unknown as Record<string, unknown>;
+      const values = Array.from({ length: mpptCount }, (_, index) => {
+        const channel = index + 1;
+        const voltage = Number(logValues[`dc_voltage_${channel}`] ?? 0);
+        const current = Number(logValues[`dc_current_${channel}`] ?? 0);
+        const power = Number(logValues[`dc_power_${channel}`] ?? 0) / 1000;
+        return `${voltage.toFixed(2)}V/${current.toFixed(2)}A/${power.toFixed(2)}kW`;
+      });
+      rows.push([this.formatLogDateTime(log.timestamp), ...values]);
     }
+
+    if (params.format === "csv") {
+      const csvEscape = (value: unknown): string => {
+        const text = String(value ?? "");
+        return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+      };
+      const csv = rows.map((row) => row.map(csvEscape).join(",")).join("\r\n");
+      const fileName = `device-information-${params.deviceId}${
+        params.dateFrom && params.dateTo
+          ? `-${params.dateFrom}-to-${params.dateTo}`
+          : "-all-data"
+      }.csv`;
+
+      return {
+        fileName,
+        downloadUrl: `/api/v1/monitor/devices/${params.deviceId}/information/export/files/${fileName}`,
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+        buffer: Buffer.from(`\uFEFF${csv}`, "utf-8"),
+        contentType: "text/csv; charset=utf-8",
+      };
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "Solar Monitoring System";
+    workbook.created = new Date();
+    workbook.modified = new Date();
+
+    const worksheet = workbook.addWorksheet("Inverter", {
+      views: [{ showGridLines: false }],
+    });
+    worksheet.addRows(rows);
+
+    for (const rowNumber of [1, 2, 3]) {
+      worksheet.getCell(rowNumber, 1).font = { bold: true };
+    }
+
+    const headerRows = rows.reduce<number[]>((result, row, index) => {
+      if (index === 0 || row[0] === "String Information" || row[0] === "Time") {
+        result.push(index + 1);
+      }
+      return result;
+    }, []);
+
+    for (const rowNumber of headerRows) {
+      const headerRow = worksheet.getRow(rowNumber);
+      headerRow.font = { bold: true };
+      headerRow.alignment = { horizontal: "center", vertical: "middle" };
+      headerRow.eachCell((cell) => {
+        cell.border = {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
+    }
+
+    const timeHeaderRow = rows.findIndex((row) => row[0] === "Time") + 1;
+    for (
+      let rowNumber = timeHeaderRow + 1;
+      rowNumber <= worksheet.rowCount;
+      rowNumber += 1
+    ) {
+      const timeCell = worksheet.getCell(rowNumber, 1);
+      const parsedTime = new Date(String(timeCell.value));
+      if (!Number.isNaN(parsedTime.getTime())) {
+        timeCell.value = parsedTime;
+        timeCell.numFmt = "yyyy-mm-dd hh:mm:ss";
+      }
+    }
+
+    worksheet.getColumn(1).width = 22;
+    for (
+      let columnNumber = 2;
+      columnNumber <= mpptCount + 1;
+      columnNumber += 1
+    ) {
+      worksheet.getColumn(columnNumber).width = 28;
+    }
+    worksheet.views = [
+      { state: "frozen", ySplit: timeHeaderRow, showGridLines: false },
+    ];
+    worksheet.autoFilter = {
+      from: `A${timeHeaderRow}`,
+      to: worksheet.getCell(timeHeaderRow, mpptCount + 1).address,
+    };
+
+    const buffer = await workbook.xlsx.writeBuffer();
 
     return {
-      fileName: `device-information-${params.deviceId}-${params.dateFrom}-to-${params.dateTo}.csv`,
-      downloadUrl: `/api/v1/monitor/devices/${params.deviceId}/information/export/files/device-information-${params.deviceId}-${params.dateFrom}-to-${params.dateTo}.csv`,
+      fileName: `device-information-${params.deviceId}${
+        params.dateFrom && params.dateTo
+          ? `-${params.dateFrom}-to-${params.dateTo}`
+          : "-all-data"
+      }.xlsx`,
+      downloadUrl: `/api/v1/monitor/devices/${params.deviceId}/information/export/files/device-information-${params.deviceId}${
+        params.dateFrom && params.dateTo
+          ? `-${params.dateFrom}-to-${params.dateTo}`
+          : "-all-data"
+      }.xlsx`,
       expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-      csv: rows.join("\n"),
+      buffer,
+      contentType:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     };
   }
 
@@ -1552,7 +1720,8 @@ export class DeviceService {
     });
 
     const headers = ["id", "name", "type", "sn", "time", "status", "event"];
-    const rows = [headers.join(",")];
+    const account = params.user.account ?? "";
+    const rows = [`Account,${account.replace(/"/g, '""')}`, headers.join(",")];
     for (const item of result.items) {
       rows.push(
         headers

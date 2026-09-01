@@ -105,9 +105,10 @@ async function getPlantListFileRoute(
         });
 
     const headers = [
+        'Account',
+        'Plant Name',
         'id',
         'ownerUserId',
-        'name',
         'type',
         'price',
         'priceUnit',
@@ -122,16 +123,19 @@ async function getPlantListFileRoute(
         'updated',
     ];
 
-    const rows = [
-        headers.join(','),
-    ];
+    const csvEscape = (value: unknown) => {
+        const text = String(value ?? '');
+        return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    };
+    const rows = [headers.map(csvEscape).join(',')];
 
     for (const plant of result.items) {
         rows.push(
             [
-                plant.id,
+                    plant.ownerUserId,
+                    plant.name,
+                    plant.id,
                 plant.ownerUserId,
-                plant.name,
                 plant.type,
                 plant.price ?? '',
                 plant.priceUnit ?? '',
@@ -144,7 +148,7 @@ async function getPlantListFileRoute(
                 plant.power?.value ?? 0,
                 plant.installed ?? '',
                 plant.updated ?? '',
-            ].join(','),
+            ].map(csvEscape).join(','),
         );
     }
 

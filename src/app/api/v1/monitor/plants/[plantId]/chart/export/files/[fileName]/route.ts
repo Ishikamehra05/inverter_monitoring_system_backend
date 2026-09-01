@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import type { AuthenticatedRequest } from '@/server/middleware/auth.middleware';
 import { requireAuth } from '@/server/middleware/auth.middleware';
 import { withRequestLogging } from '@/server/middleware/request-log.middleware';
-import { getPlantChart } from '@/server/services/plant.service';
+import { exportPlantChart } from '@/server/services/plant.service';
 import { errorResponse } from '@/server/utils/api-response';
 import type { User } from '@/server/utils/auth-helper';
 import { resolveUserScope } from '@/server/utils/scope-resolver';
@@ -105,26 +105,20 @@ async function getPlantChartFileRoute(
 		return errorResponse('File not found', 404);
 	}
 
-	const chart = await getPlantChart({
+	const data = await exportPlantChart({
 		scope,
 		plantId,
 		date: parsedQuery.data.date,
 		range: parsedQuery.data.range,
 		mode: parsedQuery.data.mode,
+		format: parsedQuery.data.format,
 	});
 
-	const headers = ['time', ...chart.series.map((item: any) => item.key)];
-	const rows = [headers.join(',')];
-
-	for (const point of chart.points as Array<Record<string, string | number>>) {
-		rows.push(headers.map((header) => String(point[header] ?? '')).join(','));
-	}
-
-	return new Response(`${rows.join('\n')}\n`, {
+	return new Response(`\uFEFF${data.csv}\r\n`, {
 		status: 200,
 		headers: {
 			'content-type': 'text/csv; charset=utf-8',
-			'content-disposition': 'attachment; filename="plant-chart.csv"',
+			'content-disposition': `attachment; filename="${data.fileName}"`,
 		},
 	});
 	// return new Response('success')

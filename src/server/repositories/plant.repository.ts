@@ -1330,15 +1330,24 @@ export class PlantRepository {
 
   async exportPlantChart(params: PlantChartExportParams) {
     const chart = await this.getPlantChart(params);
+    const plant = await this.getScopedPlantOrThrow(params.scope, params.plantId);
     const fileName = "plant-chart.csv";
 
     const headers = ["time", ...chart.series.map((item) => item.key)];
-    const rows = [headers.join(",")];
+    const csvEscape = (value: unknown) => {
+      const text = String(value ?? "");
+      return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    };
+    const rows = [
+      ["Account", plant.userAccount].map(csvEscape).join(","),
+      ["Plant Name", plant.name].map(csvEscape).join(","),
+      headers.map(csvEscape).join(","),
+    ];
 
     for (const point of chart.points as Array<
       Record<string, string | number>
     >) {
-      rows.push(headers.map((header) => String(point[header] ?? "")).join(","));
+      rows.push(headers.map((header) => csvEscape(point[header])).join(","));
     }
 
     const query = new URLSearchParams({
