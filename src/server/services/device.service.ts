@@ -1550,10 +1550,13 @@ export class DeviceService {
       [],
       ...stringInformation,
       [],
-      // [
-      //   "Time",
-      //   ...Array.from({ length: mpptCount }, (_, index) => `MPPT${index + 1}`),
-      // ],
+      [
+        "Time",
+        ...Array.from(
+          { length: mpptCount },
+          (_, index) => `MPPT${index + 1}`,
+        ),
+      ],
     ];
 
     for (const log of snapshot.logs) {
@@ -1575,8 +1578,8 @@ export class DeviceService {
       };
       const csv = rows.map((row) => row.map(csvEscape).join(",")).join("\r\n");
       const fileName = `device-information-${params.deviceId}${params.dateFrom && params.dateTo
-          ? `-${params.dateFrom}-to-${params.dateTo}`
-          : "-all-data"
+        ? `-${params.dateFrom}-to-${params.dateTo}`
+        : "-all-data"
         }.csv`;
 
       return {
@@ -1657,12 +1660,12 @@ export class DeviceService {
 
     return {
       fileName: `device-information-${params.deviceId}${params.dateFrom && params.dateTo
-          ? `-${params.dateFrom}-to-${params.dateTo}`
-          : "-all-data"
+        ? `-${params.dateFrom}-to-${params.dateTo}`
+        : "-all-data"
         }.xlsx`,
       downloadUrl: `/api/v1/monitor/devices/${params.deviceId}/information/export/files/device-information-${params.deviceId}${params.dateFrom && params.dateTo
-          ? `-${params.dateFrom}-to-${params.dateTo}`
-          : "-all-data"
+        ? `-${params.dateFrom}-to-${params.dateTo}`
+        : "-all-data"
         }.xlsx`,
       expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
       buffer,
