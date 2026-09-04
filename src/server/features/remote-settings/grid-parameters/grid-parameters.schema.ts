@@ -8,7 +8,8 @@ export const gridParametersQuerySchema = z.object({
 });
 
 export const gridParametersSettingsSchema = z.object({
-	standardCode: z.enum(['IN', 'EU', 'AU']).optional(),
+	// standardCode: z.enum(['IN', 'EU', 'AU']).optional(),
+	standardCode: z.number().optional(),
 	firstConnectDelayTime: z.number().optional(),
 	reconnectDelayTime: z.number().optional(),
 	firstConnectPowerGradient: z.number().optional(),
