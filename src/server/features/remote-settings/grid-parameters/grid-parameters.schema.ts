@@ -4,7 +4,7 @@ export const gridParametersQuerySchema = z.object({
 	role: z.string().optional(),
 	fromService: z.boolean().optional(),
 	targetEndUserId: z.string().optional(),
-	plantId: z.string().min(1, 'plantId is required'),
+	sn: z.string().min(1, 'sn is required'),
 });
 
 export const gridParametersSettingsSchema = z.object({
@@ -40,7 +40,7 @@ export const gridParametersSettingsSchema = z.object({
 });
 
 export const gridParametersBodySchema = z.object({
-	sn: z.string().optional(),
+	sn: z.string().min(1, 'sn is required'),
 	settings: gridParametersSettingsSchema,
 });
 
