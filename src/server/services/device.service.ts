@@ -923,15 +923,12 @@ export class DeviceService {
       dailyProduction: Decimal | null;
       totalEnergy: Decimal | null;
     }>,
+    date: string,
   ) {
-    if (logs.length === 0) {
-      return [];
-    }
+    const selectedDate = new Date(date);
 
-    const firstDate = new Date(logs[0].dayDate);
-
-    const year = firstDate.getFullYear();
-    const month = firstDate.getMonth();
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
 
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -1080,7 +1077,7 @@ export class DeviceService {
 
         series: energySeries,
 
-        points: this.createMonthPoints(logs),
+        points: this.createMonthPoints(logs, params.date),
       };
     }
 
