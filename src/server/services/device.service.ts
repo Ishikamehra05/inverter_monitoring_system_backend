@@ -1347,23 +1347,29 @@ export class DeviceService {
   }
 
   async getDeviceCurrentAlerts(params: DeviceCurrentAlertsServiceParams) {
-    const scope = await this.resolveScope(
-      params.user,
-      params.fromService,
-      params.targetEndUserId,
-    );
     const repoParams: DeviceCurrentAlertsSnapshotParams = {
       plantId: params.plantId,
       deviceId: params.deviceId,
     };
 
+    // First get the device and its plant account
     const snapshot =
       await this.deviceRepository.getDeviceCurrentAlertsSnapshot(repoParams);
+
+    // Now resolve scope using the plant account
+    const scope = await this.resolveScope(
+      params.user,
+      params.fromService,
+      params.targetEndUserId,
+      snapshot.plantAccount,
+    );
+
     this.assertPlantAccess(scope, snapshot.plantAccount);
 
     const allItems = this.toCurrentAlertItems(snapshot);
 
     const liveItems = this.filterLiveRefreshItems(allItems, params.since);
+
     const sortedItems = this.sortCurrentAlertItems(
       liveItems,
       params.sortBy,
@@ -1371,11 +1377,23 @@ export class DeviceService {
     );
 
     const totalItems = sortedItems.length;
+
     const totalPages =
-      totalItems > 0 ? Math.ceil(totalItems / params.pageSize) : 0;
-    const safePage = totalPages > 0 ? Math.min(params.page, totalPages) : 1;
+      totalItems > 0
+        ? Math.ceil(totalItems / params.pageSize)
+        : 0;
+
+    const safePage =
+      totalPages > 0
+        ? Math.min(params.page, totalPages)
+        : 1;
+
     const start = (safePage - 1) * params.pageSize;
-    const items = sortedItems.slice(start, start + params.pageSize);
+
+    const items = sortedItems.slice(
+      start,
+      start + params.pageSize,
+    );
 
     return {
       items,

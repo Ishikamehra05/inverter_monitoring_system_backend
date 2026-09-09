@@ -64,6 +64,7 @@ export interface DeviceLatestRecord {
   communicationStatus: any;
   communicationModuleVersion: any;
   communicationModuleSn: string;
+  monitorDeviceId: string | null;
 }
 
 export interface ModuleLatestRecord {
@@ -326,7 +327,7 @@ export class UserService {
   }
   constructor(
     private readonly userRepository: UserRepository = new UserRepository(),
-  ) {}
+  ) { }
 
   private isRoleAllowedForSubAccountManagement(
     role: string | undefined,
@@ -603,6 +604,7 @@ export class UserService {
       data: {
         device: {
           id: device.id.toString(),
+          monitorDeviceId: device.monitorDeviceId,
           sno: device.sno,
           inverterName: device.inverterName,
           dayDate: device.dayDate.toString(),
@@ -1042,19 +1044,98 @@ export class UserService {
     }
   }
 
+  // async deleteServiceAdminById(
+  //   id: bigint,
+  //   actorId: bigint,
+  //   actorRole: string | undefined,
+  // ): Promise<ServiceAdminUserDeleteResult> {
+  //   const accessError = await this.validateSubAccountManager(
+  //     actorId,
+  //     actorRole,
+  //   );
+  //   if (accessError) {
+  //     return accessError;
+  //   }
+
+  //   if (id === actorId) {
+  //     return {
+  //       status: 400,
+  //       message: "You cannot delete your own account",
+  //     };
+  //   }
+
+  //   const existing = await this.userRepository.findScopedServiceAdminById(
+  //     id,
+  //     actorId,
+  //   );
+
+  //   if (!existing) {
+  //     return {
+  //       status: 404,
+  //       message: "User not found",
+  //     };
+  //   }
+
+  //   if (existing.isDeleted) {
+  //     return {
+  //       status: 400,
+  //       message: "User is already deleted",
+  //     };
+  //   }
+
+  //   try {
+  //     const deleted =
+  //       await this.userRepository.softDeleteScopedServiceAdminById(id, actorId);
+
+  //     if (!deleted) {
+  //       return {
+  //         status: 400,
+  //         message: "User is already deleted",
+  //       };
+  //     }
+
+  //     return {
+  //       status: 200,
+  //       message: "User deleted successfully.",
+  //       data: this.mapSubAccountDeleteData(deleted),
+  //     };
+  //   } catch (error: unknown) {
+  //     return {
+  //       status: 500,
+  //       message: toErrorMessage(error),
+  //     };
+  //   }
+  // }
+  
   async deleteServiceAdminById(
     id: bigint,
     actorId: bigint,
     actorRole: string | undefined,
-  ): Promise<ServiceAdminUserDeleteResult> {
+  ): Promise<ServiceAdminUserDeleteResult | DeleteUserServiceResult> {
     const accessError = await this.validateSubAccountManager(
       actorId,
       actorRole,
     );
+
     if (accessError) {
       return accessError;
     }
 
+    // Service Super Admin:
+    // delete the searched/target user directly by target user ID.
+    if (actorRole === "service_super_admin") {
+      if (id === actorId) {
+        return {
+          status: 400,
+          message: "You cannot delete your own account",
+        };
+      }
+
+      return this.deleteById(id);
+    }
+
+    // Service Admin:
+    // keep existing scoped delete behaviour.
     if (id === actorId) {
       return {
         status: 400,
@@ -1062,10 +1143,11 @@ export class UserService {
       };
     }
 
-    const existing = await this.userRepository.findScopedServiceAdminById(
-      id,
-      actorId,
-    );
+    const existing =
+      await this.userRepository.findScopedServiceAdminById(
+        id,
+        actorId,
+      );
 
     if (!existing) {
       return {
@@ -1083,7 +1165,10 @@ export class UserService {
 
     try {
       const deleted =
-        await this.userRepository.softDeleteScopedServiceAdminById(id, actorId);
+        await this.userRepository.softDeleteScopedServiceAdminById(
+          id,
+          actorId,
+        );
 
       if (!deleted) {
         return {
