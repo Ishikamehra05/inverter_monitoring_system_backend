@@ -396,47 +396,47 @@ export class PlantRepository {
   }
 
   private async getAllChartDevices(scope: string[]) {
-    const plants = await prisma.plant.findMany({
-      where: {
-        userAccount: {
-          in: scope,
-        },
+  const plants = await prisma.plant.findMany({
+    where: {
+      userAccount: {
+        in: scope,
       },
-      select: {
-        id: true,
-        name: true,
-      },
-    });
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
 
-    const plantIds = plants.map((plant) => plant.id);
+  const plantIds = plants.map((plant) => plant.id);
 
-    if (plantIds.length === 0) {
-      return {
-        plants,
-        devices: [],
-      };
-    }
-
-    const devices = await prisma.deviceInverter.findMany({
-      where: {
-        plantId: {
-          in: plantIds,
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-        type: true,
-        serialNumber: true,
-        plantId: true,
-      },
-    });
-
+  if (plantIds.length === 0) {
     return {
       plants,
-      devices,
+      devices: [],
     };
   }
+
+  const devices = await prisma.deviceInverter.findMany({
+    where: {
+      plantId: {
+        in: plantIds,
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      serialNumber: true,
+      plantId: true,
+    },
+  });
+
+  return {
+    plants,
+    devices,
+  };
+}
 
   private async getCurrentAlertsContext(scope: string[], plantId: string) {
     const { plant, devices } = await this.getChartContext(scope, plantId);
@@ -695,18 +695,18 @@ export class PlantRepository {
 
       const latestLogs = latestConditions.length
         ? await prisma.deviceLogsLatest.findMany({
-          where: {
-            OR: latestConditions,
-          },
+            where: {
+              OR: latestConditions,
+            },
 
-          select: {
-            currentPower: true,
-            dailyProduction: true,
-            totalEnergy: true,
-            totalHours: true,
-            latestTimestamp: true,
-          },
-        })
+            select: {
+              currentPower: true,
+              dailyProduction: true,
+              totalEnergy: true,
+              totalHours: true,
+              latestTimestamp: true,
+            },
+          })
         : [];
 
       aggregates = latestLogs.reduce<{
@@ -764,23 +764,23 @@ export class PlantRepository {
 
         currentStatus: plantStatus
           ? {
-            status: plantStatus.status,
-            totalDevices: plantStatus.totalDevices,
-            normalCount: plantStatus.normalCount,
-            abnormalCount: plantStatus.abnormalCount,
-            standbyCount: plantStatus.standbyCount,
-            offlineCount: plantStatus.offlineCount,
-            updatedAt: plantStatus.updatedAt,
-          }
+              status: plantStatus.status,
+              totalDevices: plantStatus.totalDevices,
+              normalCount: plantStatus.normalCount,
+              abnormalCount: plantStatus.abnormalCount,
+              standbyCount: plantStatus.standbyCount,
+              offlineCount: plantStatus.offlineCount,
+              updatedAt: plantStatus.updatedAt,
+            }
           : {
-            status: PlantStatus.Offline,
-            totalDevices: 0,
-            normalCount: 0,
-            abnormalCount: 0,
-            standbyCount: 0,
-            offlineCount: 0,
-            updatedAt: null,
-          },
+              status: PlantStatus.Offline,
+              totalDevices: 0,
+              normalCount: 0,
+              abnormalCount: 0,
+              standbyCount: 0,
+              offlineCount: 0,
+              updatedAt: null,
+            },
 
         installationDate: plant.installed
           ? plant.installed.toISOString().slice(0, 10)
@@ -1324,22 +1324,22 @@ export class PlantRepository {
           );
 
           const total = dayLogs.reduce(
-            (sum, log) =>
-              sum +
-              this.decimalToNumber(
-                log.dailyProduction ?? 0,
-              ),
-            0,
-          );
-
-          const roundedTotal = Number(
-            total.toFixed(2),
-          );
+          (sum, log) =>
+            sum +
+            this.decimalToNumber(
+              log.dailyProduction ?? 0,
+            ),
+          0,
+        );
+        
+        const roundedTotal = Number(
+          total.toFixed(2),
+        );
 
           return {
-            time: `Day ${day}`,
-            total: roundedTotal,
-          };
+              time: `Day ${day}`,
+              total: roundedTotal,
+            };
         },
       );
 
@@ -1429,15 +1429,15 @@ export class PlantRepository {
             ),
           0,
         );
-
+        
         const roundedTotal = Number(
           total.toFixed(2),
         );
 
         return {
-          time: monthName,
-          total: roundedTotal,
-        };
+      time: monthName,
+      total: roundedTotal,
+    };
       });
 
     return {
@@ -1673,109 +1673,109 @@ export class PlantRepository {
   }
 
   async exportPlantChart(params: PlantChartExportParams) {
-    const chart = await this.getPlantChart(params);
-    const plant = await this.getScopedPlantOrThrow(
-      params.scope,
-      params.plantId,
-    );
+  const chart = await this.getPlantChart(params);
+  const plant = await this.getScopedPlantOrThrow(
+    params.scope,
+    params.plantId,
+  );
 
-    // Get inverter serial numbers in the same order as chart series
-    const devices = await prisma.deviceInverter.findMany({
-      where: {
-        plantId: plant.id,
-        deletedAt: null,
-      },
-      select: {
-        serialNumber: true,
-      },
-      orderBy: {
-        id: "asc",
-      },
-    });
+  // Get inverter serial numbers in the same order as chart series
+  const devices = await prisma.deviceInverter.findMany({
+    where: {
+      plantId: plant.id,
+      deletedAt: null,
+    },
+    select: {
+      serialNumber: true,
+    },
+    orderBy: {
+      id: "asc",
+    },
+  });
 
-    const fileName = "plant-chart.csv";
+  const fileName = "plant-chart.csv";
 
-    const csvEscape = (value: unknown) => {
-      const text = String(value ?? "");
+  const csvEscape = (value: unknown) => {
+    const text = String(value ?? "");
 
-      return /[",\r\n]/.test(text)
-        ? `"${text.replace(/"/g, '""')}"`
-        : text;
-    };
+    return /[",\r\n]/.test(text)
+      ? `"${text.replace(/"/g, '""')}"`
+      : text;
+  };
 
-    // Use SN instead of inverter1, inverter2, inverter3
-    const headers =
-      params.mode === "total"
-        ? ["time", "total"]
-        : [
+  // Use SN instead of inverter1, inverter2, inverter3
+  const headers =
+    params.mode === "total"
+      ? ["time", "total"]
+      : [
           "time",
           ...devices.map((device) => device.serialNumber),
         ];
 
-    const rows = [
-      ["Account", plant.userAccount].map(csvEscape).join(","),
-      ["Plant Name", plant.name].map(csvEscape).join(","),
-      headers.map(csvEscape).join(","),
-    ];
+  const rows = [
+    ["Account", plant.userAccount].map(csvEscape).join(","),
+    ["Plant Name", plant.name].map(csvEscape).join(","),
+    headers.map(csvEscape).join(","),
+  ];
 
-    for (const point of chart.points as Array<
-      Record<string, string | number>
-    >) {
-      const row = headers.map((header) => {
-        // time column
-        if (header === "time") {
-          return csvEscape(point.time);
-        }
+  for (const point of chart.points as Array<
+    Record<string, string | number>
+  >) {
+    const row = headers.map((header) => {
+      // time column
+      if (header === "time") {
+        return csvEscape(point.time);
+      }
 
-        // total mode
-        if (params.mode === "total" && header === "total") {
-          return csvEscape(point.total);
-        }
+      // total mode
+      if (params.mode === "total" && header === "total") {
+        return csvEscape(point.total);
+      }
 
-        // Find inverter index from SN
-        const deviceIndex = devices.findIndex(
-          (device) => device.serialNumber === header,
-        );
+      // Find inverter index from SN
+      const deviceIndex = devices.findIndex(
+        (device) => device.serialNumber === header,
+      );
 
-        if (deviceIndex === -1) {
-          return "";
-        }
+      if (deviceIndex === -1) {
+        return "";
+      }
 
-        // Existing chart data still uses inverter1, inverter2, inverter3
-        const inverterKey = `inverter${deviceIndex + 1}`;
+      // Existing chart data still uses inverter1, inverter2, inverter3
+      const inverterKey = `inverter${deviceIndex + 1}`;
 
-        return csvEscape(point[inverterKey]);
-      });
-
-      rows.push(row.join(","));
-    }
-
-    const query = new URLSearchParams({
-      range: params.range,
-      mode: params.mode,
-      date: params.date,
+      return csvEscape(point[inverterKey]);
     });
 
-    if (params.scope.length) {
-      query.set("scope", params.scope.join(","));
-    }
-
-    if (params.fromService) {
-      query.set("fromService", "true");
-    }
-
-    if (params.targetEndUserId) {
-      query.set("targetEndUserId", params.targetEndUserId);
-    }
-
-    return {
-      fileName,
-      csv: rows.join("\n"),
-      downloadUrl:
-        `/api/v1/monitor/plants/${params.plantId}/chart/export/files/${fileName}?${query.toString()}`,
-      expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-    };
+    rows.push(row.join(","));
   }
+
+  const query = new URLSearchParams({
+    range: params.range,
+    mode: params.mode,
+    date: params.date,
+  });
+
+  if (params.scope.length) {
+    query.set("scope", params.scope.join(","));
+  }
+
+  if (params.fromService) {
+    query.set("fromService", "true");
+  }
+
+  if (params.targetEndUserId) {
+    query.set("targetEndUserId", params.targetEndUserId);
+  }
+
+  return {
+    fileName,
+    csv: rows.join("\n"),
+    downloadUrl:
+      `/api/v1/monitor/plants/${params.plantId}/chart/export/files/${fileName}?${query.toString()}`,
+    expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+  };
+}
 
   async getPlantAnalysis(params: PlantAnalysisParams) {
     console.log("getPlantAnalysis scope =>", params.scope);
@@ -2485,7 +2485,7 @@ export class PlantRepository {
           pictureFileId: plant.pictureFileId,
 
           pictureUrl: plant.pictureFileId
-            ? `https://api.solarlogger.in/api/v1/uploads/plants/${encodeURIComponent(
+            ? `https://napi.solarlogger.in/api/v1/uploads/plants/${encodeURIComponent(
               plant.pictureFileId.split("/").pop()!,
             )}`
             : null,
@@ -2632,8 +2632,9 @@ export class PlantRepository {
     return {
       fileName: "plant-list.csv",
 
-      downloadUrl: `/api/v1/monitor/plants/list/export/files/plant-list.csv${query.toString() ? `?${query.toString()}` : ""
-        }`,
+      downloadUrl: `/api/v1/monitor/plants/list/export/files/plant-list.csv${
+        query.toString() ? `?${query.toString()}` : ""
+      }`,
 
       expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
 

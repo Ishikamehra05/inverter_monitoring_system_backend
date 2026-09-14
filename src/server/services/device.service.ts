@@ -879,76 +879,76 @@ export class DeviceService {
       },
     };
   }
+  
+private createMonthPoints(
+  logs: Array<{
+    dayDate: Date;
+    dailyProduction: Decimal | null;
+    totalEnergy: Decimal | null;
+  }>,
+  date: string,
+) {
+  const selectedDate = new Date(date);
 
-  // private createMonthPoints(
-  //   logs: Array<{
-  //     dayDate: Date;
-  //     dailyProduction: Decimal | null;
-  //     totalEnergy: Decimal | null;
-  //   }>,
-  // ) {
-  //   if (logs.length === 0) {
-  //     return [];
-  //   }
+  const year = selectedDate.getFullYear();
+  const month = selectedDate.getMonth();
 
-  //   const firstDate = new Date(logs[0].dayDate);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  //   const daysInMonth = new Date(
-  //     firstDate.getFullYear(),
-  //     firstDate.getMonth() + 1,
-  //     0,
-  //   ).getDate();
+  const dailyMap = new Map<number, number>();
 
-  //   return Array.from(
-  //     {
-  //       length: daysInMonth,
-  //     },
-  //     (_, index) => {
-  //       const day = index + 1;
+  for (const log of logs) {
+    const day = new Date(log.dayDate).getDate();
 
-  //       const row = logs.find((log) => new Date(log.dayDate).getDate() === day);
-
-  //       return {
-  //         date: String(day).padStart(2, "0"),
-
-  //         total: row?.dailyProduction ?? 0,
-  //       };
-  //     },
-  //   );
-  // }
-
-  private createMonthPoints(
-    logs: Array<{
-      dayDate: Date;
-      dailyProduction: Decimal | null;
-      totalEnergy: Decimal | null;
-    }>,
-    date: string,
-  ) {
-    const selectedDate = new Date(date);
-
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth();
-
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    const dailyMap = new Map<number, number>();
-
-    for (const log of logs) {
-      const day = new Date(log.dayDate).getDate();
-
-      dailyMap.set(day, Number(log.dailyProduction ?? 0));
-    }
-
-    return Array.from({ length: daysInMonth }, (_, index) => {
-      const day = index + 1;
-
-      return {
-        date: String(day).padStart(2, "0"),
-        total: Number((dailyMap.get(day) ?? 0).toFixed(2)),
-      };
-    });
+    dailyMap.set(day, Number(log.dailyProduction ?? 0));
   }
+
+  return Array.from({ length: daysInMonth }, (_, index) => {
+    const day = index + 1;
+
+    return {
+      date: String(day).padStart(2, "0"),
+      total: Number((dailyMap.get(day) ?? 0).toFixed(2)),
+    };
+  });
+}
+
+
+//   private createMonthPoints(
+//     logs: Array<{
+//       dayDate: Date;
+//       dailyProduction: Decimal | null;
+//       totalEnergy: Decimal | null;
+//     }>,
+//   ) {
+//     if (logs.length === 0) {
+//       return [];
+//     }
+
+//     const firstDate = new Date(logs[0].dayDate);
+
+//     const year = firstDate.getFullYear();
+//     const month = firstDate.getMonth();
+
+//     const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+//     const dailyMap = new Map<number, number>();
+
+//     for (const log of logs) {
+//       const day = new Date(log.dayDate).getDate();
+
+//       dailyMap.set(day, Number(log.dailyProduction ?? 0));
+//     }
+
+//     return Array.from({ length: daysInMonth }, (_, index) => {
+//       const day = index + 1;
+
+//       return {
+//         date: String(day).padStart(2, "0"),
+//         total: Number((dailyMap.get(day) ?? 0).toFixed(2)),
+//       };
+//     });
+//   }
 
   // private createYearPoints(
   //   logs: Array<{
@@ -1343,7 +1343,7 @@ export class DeviceService {
     };
   }
 
-  async getDeviceCurrentAlerts(params: DeviceCurrentAlertsServiceParams) {
+    async getDeviceCurrentAlerts(params: DeviceCurrentAlertsServiceParams) {
     const repoParams: DeviceCurrentAlertsSnapshotParams = {
       plantId: params.plantId,
       deviceId: params.deviceId,
@@ -1593,8 +1593,8 @@ export class DeviceService {
       };
       const csv = rows.map((row) => row.map(csvEscape).join(",")).join("\r\n");
       const fileName = `device-information-${params.deviceId}${params.dateFrom && params.dateTo
-        ? `-${params.dateFrom}-to-${params.dateTo}`
-        : "-all-data"
+          ? `-${params.dateFrom}-to-${params.dateTo}`
+          : "-all-data"
         }.csv`;
 
       return {
@@ -1675,12 +1675,12 @@ export class DeviceService {
 
     return {
       fileName: `device-information-${params.deviceId}${params.dateFrom && params.dateTo
-        ? `-${params.dateFrom}-to-${params.dateTo}`
-        : "-all-data"
+          ? `-${params.dateFrom}-to-${params.dateTo}`
+          : "-all-data"
         }.xlsx`,
       downloadUrl: `/api/v1/monitor/devices/${params.deviceId}/information/export/files/device-information-${params.deviceId}${params.dateFrom && params.dateTo
-        ? `-${params.dateFrom}-to-${params.dateTo}`
-        : "-all-data"
+          ? `-${params.dateFrom}-to-${params.dateTo}`
+          : "-all-data"
         }.xlsx`,
       expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
       buffer,

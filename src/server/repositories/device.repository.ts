@@ -164,7 +164,7 @@ type DeviceRow = {
 };
 
 export class DeviceRepository {
-  constructor(private readonly dbClient: PrismaClient = prisma) { }
+  constructor(private readonly dbClient: PrismaClient = prisma) {}
 
   private formatDateTime(value: Date | null | undefined): string {
     const date = value ?? new Date();
@@ -609,25 +609,25 @@ export class DeviceRepository {
     const latestLogs =
       latestConditions.length > 0
         ? await this.dbClient.deviceLogsLatest.findMany({
-          where: {
-            OR: latestConditions,
-          },
+            where: {
+              OR: latestConditions,
+            },
 
-          select: {
-            sno: true,
-            currentPower: true,
-            dailyProduction: true,
-            totalEnergy: true,
-            totalHours: true,
-            latestTimestamp: true,
+            select: {
+              sno: true,
+              currentPower: true,
+              dailyProduction: true,
+              totalEnergy: true,
+              totalHours: true,
+              latestTimestamp: true,
 
-            sourceLog: {
-              select: {
-                mac_address: true,
+              sourceLog: {
+                select: {
+                  mac_address: true,
+                },
               },
             },
-          },
-        })
+          })
         : [];
 
     // Get MAC addresses from latest logs
@@ -639,17 +639,17 @@ export class DeviceRepository {
     const connectionStatuses =
       macAddresses.length > 0
         ? await this.dbClient.deviceConnectionStatus.findMany({
-          where: {
-            macAddress: {
-              in: macAddresses,
+            where: {
+              macAddress: {
+                in: macAddresses,
+              },
             },
-          },
 
-          select: {
-            macAddress: true,
-            status: true,
-          },
-        })
+            select: {
+              macAddress: true,
+              status: true,
+            },
+          })
         : [];
 
     // Latest log by inverter serial number
@@ -1437,41 +1437,41 @@ export class DeviceRepository {
   }
 
   async getDeviceMonthChartLogs(params: { sno: string; date: string }) {
-    const current = new Date(params.date);
+  const current = new Date(params.date);
 
-    const start = new Date(
-      current.getFullYear(),
-      current.getMonth(),
-      1,
-    );
+  const start = new Date(
+    current.getFullYear(),
+    current.getMonth(),
+    1,
+  );
 
-    const end = new Date(
-      current.getFullYear(),
-      current.getMonth() + 1,
-      1,
-    );
+  const end = new Date(
+    current.getFullYear(),
+    current.getMonth() + 1,
+    1,
+  );
 
-    return this.dbClient.deviceLogsLatest.findMany({
-      where: {
-        sno: params.sno,
-        dayDate: {
-          gte: start,
-          lt: end,
-        },
+  return this.dbClient.deviceLogsLatest.findMany({
+    where: {
+      sno: params.sno,
+      dayDate: {
+        gte: start,
+        lt: end,
       },
+    },
 
-      select: {
-        dayDate: true,
-        latestTimestamp: true,
-        dailyProduction: true,
-        totalEnergy: true,
-      },
+    select: {
+      dayDate: true,
+      latestTimestamp: true,
+      dailyProduction: true,
+      totalEnergy: true,
+    },
 
-      orderBy: {
-        dayDate: "asc",
-      },
-    });
-  }
+    orderBy: {
+      dayDate: "asc",
+    },
+  });
+}
 
   async getDeviceYearChartLogs(params: { sno: string; date: string }) {
     const current = new Date(params.date);
@@ -1999,20 +1999,20 @@ export class DeviceRepository {
     if (inverter) {
       const latestLog = inverter.serialNumber
         ? await this.dbClient.deviceLogsLatest.findFirst({
-          where: {
-            sno: inverter.serialNumber,
-          },
-          orderBy: {
-            latestTimestamp: "desc",
-          },
-          select: {
-            currentPower: true,
-            dailyProduction: true,
-            totalEnergy: true,
-            totalHours: true,
-            latestTimestamp: true,
-          },
-        })
+            where: {
+              sno: inverter.serialNumber,
+            },
+            orderBy: {
+              latestTimestamp: "desc",
+            },
+            select: {
+              currentPower: true,
+              dailyProduction: true,
+              totalEnergy: true,
+              totalHours: true,
+              latestTimestamp: true,
+            },
+          })
         : null;
 
       return {
@@ -2264,18 +2264,18 @@ export class DeviceRepository {
         : { plant: { userAccount: { in: params.scope }, deletedAt: null } }),
       ...(params.search
         ? {
-          OR: [
-            {
-              name: { contains: params.search, mode: "insensitive" as const },
-            },
-            {
-              serialNumber: {
-                contains: params.search,
-                mode: "insensitive" as const,
+            OR: [
+              {
+                name: { contains: params.search, mode: "insensitive" as const },
               },
-            },
-          ],
-        }
+              {
+                serialNumber: {
+                  contains: params.search,
+                  mode: "insensitive" as const,
+                },
+              },
+            ],
+          }
         : {}),
     };
 

@@ -75,7 +75,7 @@ export interface DataloggerLatestRecord {
   updatedAt: Date;
 }
 export class UserRepository {
-  constructor(private readonly dbClient: PrismaClient = prisma) { }
+  constructor(private readonly dbClient: PrismaClient = prisma) {}
   async getManagedAccounts(serviceAdminId: bigint): Promise<string[]> {
     const users = await this.dbClient.user.findMany({
       where: {
@@ -224,7 +224,7 @@ export class UserRepository {
     return user ? this.mapDetailRecord(user) : null;
   }
 
-  async findLatestDeviceBySN(
+    async findLatestDeviceBySN(
     sno: string,
     plantId?: string | bigint,
   ): Promise<DeviceLatestRecord | null> {
@@ -394,6 +394,11 @@ export class UserRepository {
       phone?: string | null;
       address?: string | null;
       timezone?: string | null;
+      epcCompany?: string | null;
+      epcInstaller?: string | null;
+      epcMobile?: string | null;
+      epcEmail?: string | null;
+      epcAddress?: string | null;
     },
   ) {
     return this.dbClient.user.update({
@@ -405,6 +410,11 @@ export class UserRepository {
         phone: payload.phone ?? null,
         address: payload.address ?? null,
         timezone: payload.timezone ?? null,
+        epcCompany: payload.epcCompany ?? null,
+        epcInstaller: payload.epcInstaller ?? null,
+        epcMobile: payload.epcMobile ?? null,
+        epcEmail: payload.epcEmail ?? null,
+        epcAddress: payload.epcAddress ?? null,
       },
       select: {
         account: true,
@@ -413,6 +423,11 @@ export class UserRepository {
         address: true,
         timezone: true,
         updatedAt: true,
+        epcCompany: true,
+        epcInstaller: true,
+        epcMobile: true,
+        epcEmail: true,
+        epcAddress: true,
       },
     });
   }
@@ -428,6 +443,11 @@ export class UserRepository {
         phone: true,
         address: true,
         timezone: true,
+        epcCompany: true,
+        epcInstaller: true,
+        epcMobile: true,
+        epcEmail: true,
+        epcAddress: true,
       },
     });
   }
@@ -782,46 +802,46 @@ export class UserRepository {
     return this.mapDetailRecord(record);
   }
 
-  //   async findScopedServiceAdmins(
-  //     actorId: bigint,
-  //     actorRole: string | undefined,
-  //   ) {
-  //     const where: any = {
-  //       role: "service_admin",
-  //       isDeleted: false,
-  //     };
+//   async findScopedServiceAdmins(
+//     actorId: bigint,
+//     actorRole: string | undefined,
+//   ) {
+//     const where: any = {
+//       role: "service_admin",
+//       isDeleted: false,
+//     };
 
-  //     // Service Admin should only see themselves
-  //     if (actorRole === "service_admin") {
-  //       where.id = actorId;
-  //     }
+//     // Service Admin should only see themselves
+//     if (actorRole === "service_admin") {
+//       where.id = actorId;
+//     }
 
-  //     return this.dbClient.user.findMany({
-  //       where,
-  //       orderBy: {
-  //         createdAt: "desc",
-  //       },
-  //     });
-  //   }
+//     return this.dbClient.user.findMany({
+//       where,
+//       orderBy: {
+//         createdAt: "desc",
+//       },
+//     });
+//   }
 
   async findScopedServiceAdmins(
-    actorId: bigint,
-    actorRole: string | undefined,
-  ) {
-    const where: any = {
-      role: "service_admin",
-      isDeleted: false,
-      assignedById: actorId,
-      portal: "service",
-    };
+  actorId: bigint,
+  actorRole: string | undefined,
+) {
+  const where: any = {
+    role: "service_admin",
+    isDeleted: false,
+    assignedById: actorId,
+    portal: "service",
+  };
 
-    return this.dbClient.user.findMany({
-      where,
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-  }
+  return this.dbClient.user.findMany({
+    where,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}
 
   async findServiceAdminByEmailExcludingId(
     email: string,
@@ -959,94 +979,94 @@ export class UserRepository {
     return this.mapDetailRecord(updated[0]);
   }
 
-  //   async softDeleteScopedServiceAdminById(
-  //     id: bigint,
-  //     assignedById: bigint,
-  //   ): Promise<UserDetailRecord | null> {
-  //     const deleted = await this.dbClient.user.updateManyAndReturn({
-  //       where: {
-  //         id,
-  //         portal: "service",
-  //         role: "service_admin",
-  //         assignedById,
-  //         isDeleted: false,
-  //       },
-  //       data: {
-  //         isDeleted: true,
-  //         deletedAt: new Date(),
-  //       },
-  //       select: {
-  //         id: true,
-  //         account: true,
-  //         email: true,
-  //         portal: true,
-  //         role: true,
-  //         status: true,
-  //         timezone: true,
-  //         phone: true,
-  //         address: true,
-  //         assignedById: true,
-  //         isDeleted: true,
-  //         emailVerifiedAt: true,
-  //         lastLoginAt: true,
-  //         createdAt: true,
-  //         updatedAt: true,
-  //         deletedAt: true,
-  //       },
-  //     });
+//   async softDeleteScopedServiceAdminById(
+//     id: bigint,
+//     assignedById: bigint,
+//   ): Promise<UserDetailRecord | null> {
+//     const deleted = await this.dbClient.user.updateManyAndReturn({
+//       where: {
+//         id,
+//         portal: "service",
+//         role: "service_admin",
+//         assignedById,
+//         isDeleted: false,
+//       },
+//       data: {
+//         isDeleted: true,
+//         deletedAt: new Date(),
+//       },
+//       select: {
+//         id: true,
+//         account: true,
+//         email: true,
+//         portal: true,
+//         role: true,
+//         status: true,
+//         timezone: true,
+//         phone: true,
+//         address: true,
+//         assignedById: true,
+//         isDeleted: true,
+//         emailVerifiedAt: true,
+//         lastLoginAt: true,
+//         createdAt: true,
+//         updatedAt: true,
+//         deletedAt: true,
+//       },
+//     });
 
-  //     if (deleted.length === 0) {
-  //       return null;
-  //     }
+//     if (deleted.length === 0) {
+//       return null;
+//     }
 
-  //     return this.mapDetailRecord(deleted[0]);
-  //   }
+//     return this.mapDetailRecord(deleted[0]);
+//   }
 
-  async softDeleteScopedServiceAdminById(
-    id: bigint,
-    assignedById: bigint,
-  ): Promise<UserDetailRecord | null> {
-    const existing = await this.dbClient.user.findFirst({
-      where: {
-        id,
-        portal: "service",
-        role: "service_admin",
-        assignedById,
-        isDeleted: false,
-      },
-      select: {
-        account: true,
-        email: true,
-      },
-    });
+async softDeleteScopedServiceAdminById(
+  id: bigint,
+  assignedById: bigint,
+): Promise<UserDetailRecord | null> {
+  const existing = await this.dbClient.user.findFirst({
+    where: {
+      id,
+      portal: "service",
+      role: "service_admin",
+      assignedById,
+      isDeleted: false,
+    },
+    select: {
+      account: true,
+      email: true,
+    },
+  });
 
-    if (!existing) {
-      return null;
-    }
+  if (!existing) {
+    return null;
+  }
 
-    const baseAccount = `${existing.account}_deleted`;
-    const baseEmail = existing.email
-      ? `${existing.email}_deleted`
-      : null;
+  const baseAccount = `${existing.account}_deleted`;
+  const baseEmail = existing.email
+    ? `${existing.email}_deleted`
+    : null;
 
-    let deletedAccount = baseAccount;
-    let deletedEmail = baseEmail;
-    let counter = 1;
+  let deletedAccount = baseAccount;
+  let deletedEmail = baseEmail;
+  let counter = 1;
 
-    while (true) {
-      const [existingAccount, existingEmail] = await Promise.all([
-        this.dbClient.user.findFirst({
-          where: {
-            account: deletedAccount,
-            id: { not: id },
-          },
-          select: {
-            id: true,
-          },
-        }),
+  while (true) {
+    const [existingAccount, existingEmail] = await Promise.all([
+      this.dbClient.user.findFirst({
+        where: {
+          account: deletedAccount,
+          id: { not: id },
+        },
+        select: {
+          id: true,
+        },
+      }),
 
-        deletedEmail
-          ? this.dbClient.user.findFirst({
+      deletedEmail
+        ? this.dbClient.user.findFirst({
             where: {
               email: deletedEmail,
               id: { not: id },
@@ -1055,62 +1075,62 @@ export class UserRepository {
               id: true,
             },
           })
-          : null,
-      ]);
+        : null,
+    ]);
 
-      if (!existingAccount && !existingEmail) {
-        break;
-      }
-
-      deletedAccount = `${baseAccount}_${counter}`;
-
-      if (baseEmail) {
-        deletedEmail = `${baseEmail}_${counter}`;
-      }
-
-      counter++;
+    if (!existingAccount && !existingEmail) {
+      break;
     }
 
-    const deleted = await this.dbClient.user.updateManyAndReturn({
-      where: {
-        id,
-        portal: "service",
-        role: "service_admin",
-        assignedById,
-        isDeleted: false,
-      },
-      data: {
-        isDeleted: true,
-        deletedAt: new Date(),
-        account: deletedAccount,
-        email: deletedEmail,
-      },
-      select: {
-        id: true,
-        account: true,
-        email: true,
-        portal: true,
-        role: true,
-        status: true,
-        timezone: true,
-        phone: true,
-        address: true,
-        assignedById: true,
-        isDeleted: true,
-        emailVerifiedAt: true,
-        lastLoginAt: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-      },
-    });
+    deletedAccount = `${baseAccount}_${counter}`;
 
-    if (deleted.length === 0) {
-      return null;
+    if (baseEmail) {
+      deletedEmail = `${baseEmail}_${counter}`;
     }
 
-    return this.mapDetailRecord(deleted[0]);
+    counter++;
   }
+
+  const deleted = await this.dbClient.user.updateManyAndReturn({
+    where: {
+      id,
+      portal: "service",
+      role: "service_admin",
+      assignedById,
+      isDeleted: false,
+    },
+    data: {
+      isDeleted: true,
+      deletedAt: new Date(),
+      account: deletedAccount,
+      email: deletedEmail,
+    },
+    select: {
+      id: true,
+      account: true,
+      email: true,
+      portal: true,
+      role: true,
+      status: true,
+      timezone: true,
+      phone: true,
+      address: true,
+      assignedById: true,
+      isDeleted: true,
+      emailVerifiedAt: true,
+      lastLoginAt: true,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: true,
+    },
+  });
+
+  if (deleted.length === 0) {
+    return null;
+  }
+
+  return this.mapDetailRecord(deleted[0]);
+}
 
   async getDeviceCountsByAccounts(
     accounts: string[],
@@ -1303,6 +1323,116 @@ export class UserRepository {
         isDeleted: true,
         passwordHash: true,
       },
+    });
+  }
+  
+    async findActiveUserByAccount(account: string) {
+    return prisma.user.findFirst({
+      where: {
+        account,
+        isDeleted: false,
+      },
+    });
+  }
+
+  async findInverterMappingBySerialNumber(
+    serialNumber: string,
+  ) {
+    return prisma.userPlantInverterMap.findUnique({
+      where: {
+        serialNumber,
+      },
+    });
+  }
+
+  async createUserInverterMapping(data: {
+    userId: bigint;
+    serialNumber: string;
+    plantId: bigint | null;
+  }) {
+    return prisma.userPlantInverterMap.create({
+      data: {
+        userId: data.userId,
+        serialNumber: data.serialNumber,
+        plantId: data.plantId,
+        isDeleted: false,
+        deletedAt: null,
+      },
+    });
+  }
+
+  async transferInverterToUser(data: {
+    mappingId: bigint;
+    oldUserId: bigint;
+    newUserId: bigint;
+    plantId: bigint | null;
+    serialNumber: string;
+  }) {
+    return prisma.$transaction(async (tx) => {
+      // 1. Save history
+      await tx.userInverterTransferHistory.create({
+        data: {
+          oldUserId: data.oldUserId,
+          newUserId: data.newUserId,
+          plantId: data.plantId,
+          serialNumber: data.serialNumber,
+        },
+      });
+
+      // 2. Deactivate other inverter mappings
+      //    for the same plant
+      if (data.plantId !== null) {
+        await tx.userPlantInverterMap.updateMany({
+          where: {
+            plantId: data.plantId,
+            serialNumber: {
+              not: data.serialNumber,
+            },
+            isDeleted: false,
+          },
+          data: {
+            isDeleted: true,
+            deletedAt: new Date(),
+          },
+        });
+      }
+
+      // 3. Transfer requested inverter
+      await tx.userPlantInverterMap.update({
+        where: {
+          id: data.mappingId,
+        },
+        data: {
+          userId: data.newUserId,
+          isDeleted: false,
+          deletedAt: null,
+        },
+      });
+
+      // 4. Transfer plant ownership
+      if (data.plantId !== null) {
+        const newUser = await tx.user.findUnique({
+          where: {
+            id: data.newUserId,
+          },
+          select: {
+            account: true,
+          },
+        });
+
+        if (!newUser) {
+          throw new Error("New user not found");
+        }
+
+        await tx.plant.update({
+          where: {
+            id: data.plantId,
+          },
+          data: {
+            userAccount: newUser.account,
+          },
+        });
+      }
     });
   }
 }
